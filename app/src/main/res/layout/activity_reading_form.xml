@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ReadingFormActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarReadingForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/accountName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/TextAppearance.AppCompat.Title"
+                        android:text="Name"
+                        android:layout_gravity="center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/accountNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Account Number"/>
+
+                </LinearLayout>
+
+            </androidx.appcompat.widget.Toolbar>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardElevation="3dp"
+                app:contentPadding="15dp"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Previous Reading"
+                                android:layout_column="1"
+                                android:layout_weight="1"/>
+
+                            <EditText
+                                android:id="@+id/prevReading"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_column="2"
+                                android:layout_weight="50"
+                                android:background="@drawable/options_custom_form"
+                                android:enabled="false"
+                                android:textSize="12pt"
+                                android:padding="8dp"
+                                android:gravity="right"/>
+
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Present Reading"
+                                android:layout_column="1"
+                                android:layout_weight="1"/>
+
+                            <EditText
+                                android:id="@+id/presReading"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_column="2"
+                                android:layout_weight="50"
+                                android:textSize="12pt"
+                                android:hint="0.0"
+                                android:inputType="numberDecimal"
+                                android:background="@drawable/options_custom_form"
+                                android:padding="8dp"
+                                android:gravity="right"/>
+
+                        </TableRow>
+
+                    </TableLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:background="@color/grey_100"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="10dp"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="KwH Used:" />
+
+                        <TextView
+                            android:id="@+id/kwhUsed"
+                            style="@style/TextAppearance.AppCompat.Display1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:textColor="?attr/textFillColor"
+                            android:text="0.0" />
+
+                    </RelativeLayout>
+
+                    <EditText
+                        android:id="@+id/notes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/options_custom_form"
+                        android:padding="8dp"
+                        android:inputType="textMultiLine"
+                        android:lines="2"
+                        android:layout_marginTop="10dp"
+                        android:hint="Remarks/Notes/Comments"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/billBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Read and Bill"
+                        android:drawableLeft="@drawable/ic_baseline_playlist_add_check_circle_24"
+                        android:layout_marginTop="15dp"/>
+
+                    <RelativeLayout
+                        android:layout_marginTop="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/prevButton"
+                            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_marginTop="15dp"
+                            android:drawableLeft="@drawable/ic_baseline_skip_previous_24"
+                            android:drawableTint="?attr/textFillColor"
+                            android:elevation="0dp"
+                            android:text="PREV"
+                            android:textColor="?attr/textFillColor"
+                            app:elevation="0dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/nextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NEXT"
+                            android:layout_alignParentRight="true"
+                            android:drawableRight="@drawable/ic_baseline_skip_next_24"
+                            android:layout_marginTop="15dp"
+                            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                            android:textColor="?attr/textFillColor"
+                            android:drawableTint="?attr/textFillColor"
+                            app:elevation="0dp"
+                            android:elevation="0dp"/>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardElevation="3dp"
+                app:contentPadding="15dp"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Details"
+                        style="@style/TextAppearance.AppCompat.Subhead"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:background="@color/grey_100"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sequence Code"
+                                android:layout_weight="1"
+                                android:layout_column="1"/>
+
+                            <TextView
+                                android:id="@+id/sequenceCode"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="..."
+                                android:textColor="?attr/textFillColor"
+                                android:gravity="right"
+                                android:layout_weight="2"
+                                android:layout_column="50"/>
+
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Account Status"
+                                android:layout_weight="1"
+                                android:layout_column="1"/>
+
+                            <TextView
+                                android:id="@+id/accountStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="..."
+                                android:textColor="?attr/textFillColor"
+                                android:gravity="right"
+                                android:layout_weight="2"
+                                android:layout_column="50"/>
+
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Account Type"
+                                android:layout_weight="1"
+                                android:layout_column="1"/>
+
+                            <TextView
+                                android:id="@+id/accountType"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="..."
+                                android:textColor="?attr/textFillColor"
+                                android:gravity="right"
+                                android:layout_weight="2"
+                                android:layout_column="50"/>
+
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Rate For This Account"
+                                android:layout_weight="1"
+                                android:layout_column="1"/>
+
+                            <TextView
+                                android:id="@+id/rate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="..."
+                                android:textColor="?attr/textFillColor"
+                                android:gravity="right"
+                                android:layout_weight="2"
+                                android:layout_column="50"/>
+
+                        </TableRow>
+
+                    </TableLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.mapbox.mapboxsdk.maps.MapView
+                android:id="@+id/mapviewReadingForm"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                app:mapbox_cameraZoom="13" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

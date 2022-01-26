@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/parent"
+    android:clickable="true"
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="15dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    app:contentPaddingLeft="15dp"
+    app:contentPaddingTop="15dp"
+    app:contentPaddingBottom="15dp"
+    app:cardElevation="3dp"
+    app:cardCornerRadius="12dp">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Area 05 | Day 01"/>
+
+            <TextView
+                android:id="@+id/billingMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="September 2021"/>
+
+            <TextView
+                android:id="@+id/scheduledDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="September 01, 2021"/>
+
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</com.google.android.material.card.MaterialCardView>
