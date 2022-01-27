@@ -22,10 +22,12 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
 
     public List<DownloadedPreviousReadings> downloadedPreviousReadingsList;
     public Context context;
+    public String servicePeriod;
 
-    public AccountsListAdapter(List<DownloadedPreviousReadings> downloadedPreviousReadingsList, Context context) {
+    public AccountsListAdapter(List<DownloadedPreviousReadings> downloadedPreviousReadingsList, Context context, String servicePeriod) {
         this.downloadedPreviousReadingsList = downloadedPreviousReadingsList;
         this.context = context;
+        this.servicePeriod = servicePeriod;
     }
 
     @NonNull
@@ -44,7 +46,15 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
         holder.accountNumber.setText(downloadedPreviousReadings.getId() + " | " + downloadedPreviousReadings.getAccountType());
 
         if (downloadedPreviousReadings.getAccountStatus().equals("ACTIVE")) {
-            holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_check_circle_outline_18);
+            if (downloadedPreviousReadings.getStatus() != null) {
+                if (downloadedPreviousReadings.getStatus().equals("READ")) {
+                    holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_check_circle_18);
+                } else {
+                    holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_check_circle_outline_18);
+                }
+            } else {
+                holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_check_circle_outline_18);
+            }
         } else {
             holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_error_outline_18);
         }
@@ -54,6 +64,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
             public void onClick(View view) {
                 Intent intent = new Intent(context, ReadingFormActivity.class);
                 intent.putExtra("ID", downloadedPreviousReadings.getId());
+                intent.putExtra("SERVICEPERIOD", servicePeriod);
                 context.startActivity(intent);
             }
         });

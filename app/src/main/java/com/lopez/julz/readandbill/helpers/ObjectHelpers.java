@@ -105,7 +105,16 @@ public class ObjectHelpers {
 
     public static String roundFour(Double doubleX) {
         try {
-            DecimalFormat df = new DecimalFormat("#,###.####");
+            DecimalFormat df = new DecimalFormat("#,###,###.####");
+            return df.format(doubleX);
+        } catch (Exception e) {
+            return "0.0";
+        }
+    }
+
+    public static String roundTwo(Double doubleX) {
+        try {
+            DecimalFormat df = new DecimalFormat("#,###,###.##");
             return df.format(doubleX);
         } catch (Exception e) {
             return "0.0";

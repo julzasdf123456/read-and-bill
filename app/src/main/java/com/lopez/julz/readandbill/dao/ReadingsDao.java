@@ -17,4 +17,7 @@ public interface ReadingsDao {
 
     @Update
     void updateAll(Readings... readings);
+
+    @Query("SELECT * FROM Readings WHERE AccountNumber = :accountNumber AND ServicePeriod = :servicePeriod")
+    Readings getOne(String accountNumber, String servicePeriod);
 }

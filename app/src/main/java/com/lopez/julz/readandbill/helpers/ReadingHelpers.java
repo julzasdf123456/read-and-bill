@@ -8,7 +8,7 @@ public class ReadingHelpers {
     public static String getKwhUsed(DownloadedPreviousReadings dprPrev, Double current) {
         try {
             Double prev = Double.valueOf(dprPrev.getKwhUsed());
-            return ObjectHelpers.roundFour(current - prev);
+            return (current - prev) + "";
         } catch (Exception e) {
             Log.e("ERR_GET_KWH", e.getMessage());
             return "";

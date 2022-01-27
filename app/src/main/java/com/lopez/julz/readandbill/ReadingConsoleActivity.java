@@ -116,6 +116,8 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
     public RecyclerView readingListBottomSheetRecyclerview;
     public AccountsListAdapter accountsListAdapter;
 
+    int loadCount = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -192,9 +194,9 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.bottomsheet_reading_list, null);
         bottomSheetDialog.setContentView(view);
-        closeBottomSheet = findViewById(R.id.closeBottomSheet);
+        closeBottomSheet = view.findViewById(R.id.closeBottomSheet);
         readingListBottomSheetRecyclerview = view.findViewById(R.id.readingListBottomSheetRecyclerview);
-        accountsListAdapter = new AccountsListAdapter(downloadedPreviousReadingsList, ReadingConsoleActivity.this);
+        accountsListAdapter = new AccountsListAdapter(downloadedPreviousReadingsList, ReadingConsoleActivity.this, servicePeriod);
         readingListBottomSheetRecyclerview.setAdapter(accountsListAdapter);
         readingListBottomSheetRecyclerview.setLayoutManager(new LinearLayoutManager(ReadingConsoleActivity.this));
 
@@ -218,7 +220,12 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
             }
         });
 
-
+        closeBottomSheet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bottomSheetDialog.dismiss();
+            }
+        });
     }
 
     @Override
@@ -344,6 +351,12 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+
+        if (loadCount > 0) {
+            new GetReadingListTracks().execute();
+        }
+
+        loadCount++;
     }
 
     @Override
@@ -385,6 +398,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
 
             symbolManager.setIconAllowOverlap(true);
             symbolManager.setTextAllowOverlap(true);
+            downloadedPreviousReadingsList.clear();
         }
 
         @Override
@@ -412,13 +426,34 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
             if (hasLatLong(dpr)) {
                 SymbolOptions symbolOptions;
                 if (dpr.getAccountStatus().equals("ACTIVE")) {
-                    symbolOptions = new SymbolOptions()
-                            .withLatLng(new LatLng(Double.valueOf(dpr.getLatitude()), Double.valueOf(dpr.getLongitude())))
-                            .withData(new JsonParser().parse("{" +
-                                    "'id' : '" + dpr.getId() + "'," +
-                                    "'svcPeriod' : '" + dpr.getServicePeriod() + "'}"))
-                            .withIconImage("place-black-24dp")
-                            .withIconSize(1f);
+                    if (dpr.getStatus() != null) {
+                        if (dpr.getStatus().equals("READ")) {
+                            symbolOptions = new SymbolOptions()
+                                    .withLatLng(new LatLng(Double.valueOf(dpr.getLatitude()), Double.valueOf(dpr.getLongitude())))
+                                    .withData(new JsonParser().parse("{" +
+                                            "'id' : '" + dpr.getId() + "'," +
+                                            "'svcPeriod' : '" + dpr.getServicePeriod() + "'}"))
+                                    .withIconImage("marker-blue")
+                                    .withIconSize(.30f);
+                        } else {
+                            symbolOptions = new SymbolOptions()
+                                    .withLatLng(new LatLng(Double.valueOf(dpr.getLatitude()), Double.valueOf(dpr.getLongitude())))
+                                    .withData(new JsonParser().parse("{" +
+                                            "'id' : '" + dpr.getId() + "'," +
+                                            "'svcPeriod' : '" + dpr.getServicePeriod() + "'}"))
+                                    .withIconImage("place-black-24dp")
+                                    .withIconSize(1f);
+                        }
+                    } else {
+                        symbolOptions = new SymbolOptions()
+                                .withLatLng(new LatLng(Double.valueOf(dpr.getLatitude()), Double.valueOf(dpr.getLongitude())))
+                                .withData(new JsonParser().parse("{" +
+                                        "'id' : '" + dpr.getId() + "'," +
+                                        "'svcPeriod' : '" + dpr.getServicePeriod() + "'}"))
+                                .withIconImage("place-black-24dp")
+                                .withIconSize(1f);
+                    }
+
                 } else if (dpr.getAccountStatus().equals("DISCONNECTED")) {
                     symbolOptions = new SymbolOptions()
                             .withLatLng(new LatLng(Double.valueOf(dpr.getLatitude()), Double.valueOf(dpr.getLongitude())))
@@ -434,7 +469,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
                                     "'id' : '" + dpr.getId() + "'," +
                                     "'svcPeriod' : '" + dpr.getServicePeriod() + "'}"))
                             .withIconImage("marker-blue")
-                            .withIconSize(.50f);
+                            .withIconSize(.30f);
                 }
 
                 Symbol symbol = symbolManager.create(symbolOptions);
@@ -458,6 +493,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
                         //                    Toast.makeText(HomeActivity.this, symbol.getData().getAsJsonObject().get("scId").getAsString(), Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(ReadingConsoleActivity.this, ReadingFormActivity.class);
                         intent.putExtra("ID", symbol.getData().getAsJsonObject().get("id").getAsString());
+                        intent.putExtra("SERVICEPERIOD", servicePeriod);
                         startActivity(intent);
                     }
                 });
