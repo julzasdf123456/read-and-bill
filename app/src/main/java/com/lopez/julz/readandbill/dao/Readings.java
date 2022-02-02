@@ -35,9 +35,15 @@ public class Readings {
     @ColumnInfo(name = "Longitude")
     private String Longitude;
 
+    @ColumnInfo(name = "UploadStatus")
+    private String UploadStatus;
+
+    @ColumnInfo(name = "FieldStatus")
+    private String FieldStatus;
+
     public Readings() {}
 
-    public Readings(@NonNull String id, String accountNumber, String servicePeriod, String readingTimestamp, String kwhUsed, String demandKwhUsed, String notes, String latitude, String longitude) {
+    public Readings(@NonNull String id, String accountNumber, String servicePeriod, String readingTimestamp, String kwhUsed, String demandKwhUsed, String notes, String latitude, String longitude, String uploadStatus, String fieldStatus) {
         this.id = id;
         AccountNumber = accountNumber;
         ServicePeriod = servicePeriod;
@@ -47,6 +53,8 @@ public class Readings {
         Notes = notes;
         Latitude = latitude;
         Longitude = longitude;
+        UploadStatus = uploadStatus;
+        FieldStatus = fieldStatus;
     }
 
     @NonNull
@@ -120,5 +128,21 @@ public class Readings {
 
     public void setLongitude(String longitude) {
         Longitude = longitude;
+    }
+
+    public String getUploadStatus() {
+        return UploadStatus;
+    }
+
+    public void setUploadStatus(String uploadStatus) {
+        UploadStatus = uploadStatus;
+    }
+
+    public String getFieldStatus() {
+        return FieldStatus;
+    }
+
+    public void setFieldStatus(String fieldStatus) {
+        FieldStatus = fieldStatus;
     }
 }

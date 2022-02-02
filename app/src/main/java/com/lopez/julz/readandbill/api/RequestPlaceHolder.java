@@ -1,8 +1,10 @@
 package com.lopez.julz.readandbill.api;
 
+import com.lopez.julz.readandbill.dao.Bills;
 import com.lopez.julz.readandbill.dao.DownloadedPreviousReadings;
 import com.lopez.julz.readandbill.dao.Rates;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
+import com.lopez.julz.readandbill.dao.Readings;
 import com.lopez.julz.readandbill.dao.TrackNames;
 import com.lopez.julz.readandbill.dao.Tracks;
 import com.lopez.julz.readandbill.helpers.TracksTmp;
@@ -10,10 +12,14 @@ import com.lopez.julz.readandbill.objects.Login;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 public interface RequestPlaceHolder {
@@ -46,4 +52,14 @@ public interface RequestPlaceHolder {
 
     @GET("update-downloaded-status")
     Call<String> updateDownloadedStatus(@Query("id") String id);
+
+    @POST("receive-readings")
+    Call<Readings> uploadReadings(@Body Readings readings);
+
+    @POST("receive-bills")
+    Call<Bills> uploadBills(@Body Bills bills);
+
+    @Multipart
+    @POST("save-reading-images")
+    Call<ResponseBody> saveReadingImages(@Query("Id") String Id, @Query("ServicePeriod") String servicePeriod, @Query("AccountNumber") String AccountNumber, @Part MultipartBody.Part file);
 }

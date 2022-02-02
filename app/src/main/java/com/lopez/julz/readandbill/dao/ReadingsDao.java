@@ -20,4 +20,7 @@ public interface ReadingsDao {
 
     @Query("SELECT * FROM Readings WHERE AccountNumber = :accountNumber AND ServicePeriod = :servicePeriod")
     Readings getOne(String accountNumber, String servicePeriod);
+
+    @Query("SELECT * FROM Readings WHERE UploadStatus = 'UPLOADABLE'")
+    List<Readings> getUploadables();
 }

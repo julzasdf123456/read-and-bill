@@ -22,12 +22,13 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
 
     public List<DownloadedPreviousReadings> downloadedPreviousReadingsList;
     public Context context;
-    public String servicePeriod;
+    public String servicePeriod, userId;
 
-    public AccountsListAdapter(List<DownloadedPreviousReadings> downloadedPreviousReadingsList, Context context, String servicePeriod) {
+    public AccountsListAdapter(List<DownloadedPreviousReadings> downloadedPreviousReadingsList, Context context, String servicePeriod, String userId) {
         this.downloadedPreviousReadingsList = downloadedPreviousReadingsList;
         this.context = context;
         this.servicePeriod = servicePeriod;
+        this.userId = userId;
     }
 
     @NonNull
@@ -65,6 +66,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
                 Intent intent = new Intent(context, ReadingFormActivity.class);
                 intent.putExtra("ID", downloadedPreviousReadings.getId());
                 intent.putExtra("SERVICEPERIOD", servicePeriod);
+                intent.putExtra("USERID", userId);
                 context.startActivity(intent);
             }
         });

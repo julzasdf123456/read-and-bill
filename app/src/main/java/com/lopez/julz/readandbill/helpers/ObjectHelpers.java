@@ -1,10 +1,15 @@
 package com.lopez.julz.readandbill.helpers;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Random;
 
 public class ObjectHelpers {
@@ -15,6 +20,16 @@ public class ObjectHelpers {
     public static String getCurrentTimestamp() {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            return sdf.format(new Date());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static String getCurrentDate() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
             return sdf.format(new Date());
         } catch (Exception e) {
@@ -108,7 +123,16 @@ public class ObjectHelpers {
             DecimalFormat df = new DecimalFormat("#,###,###.####");
             return df.format(doubleX);
         } catch (Exception e) {
-            return "0.0";
+            return "";
+        }
+    }
+
+    public static String roundFourNoComma(Double doubleX) {
+        try {
+            DecimalFormat df = new DecimalFormat("#.####");
+            return df.format(doubleX);
+        } catch (Exception e) {
+            return "";
         }
     }
 
@@ -117,7 +141,30 @@ public class ObjectHelpers {
             DecimalFormat df = new DecimalFormat("#,###,###.##");
             return df.format(doubleX);
         } catch (Exception e) {
-            return "0.0";
+            return "";
+        }
+    }
+
+    public static Double doubleStringNull(String regex) {
+        try {
+            if (regex.equals(null)) {
+                return 0.0;
+            } else {
+                return Double.valueOf(regex);
+            }
+        } catch (Exception e) {
+            Log.e("ERR_DBL_STRNG_NLL", e.getMessage());
+            return 0.0;
+        }
+    }
+
+    public static String getSelectedTextFromRadioGroup(RadioGroup rg, View view) {
+        try {
+            int selectedId = rg.getCheckedRadioButtonId();
+            RadioButton radioButton = (RadioButton) view.findViewById(selectedId);
+            return radioButton.getText().toString();
+        } catch (Exception e) {
+            return null;
         }
     }
 }

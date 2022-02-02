@@ -59,7 +59,7 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<HomeMenuAdapter.ViewHo
                     intent.putExtra("USERID", userId);
                     context.startActivity(intent);
                 } else if (position == 1) { // upload
-
+                    context.startActivity(new Intent(context, UploadReadingsActivity.class));
                 } else if (position == 2) { // reading list
                     Intent intent = new Intent(context, ReadingListActivity.class);
                     intent.putExtra("USERID", userId);

@@ -196,7 +196,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
         bottomSheetDialog.setContentView(view);
         closeBottomSheet = view.findViewById(R.id.closeBottomSheet);
         readingListBottomSheetRecyclerview = view.findViewById(R.id.readingListBottomSheetRecyclerview);
-        accountsListAdapter = new AccountsListAdapter(downloadedPreviousReadingsList, ReadingConsoleActivity.this, servicePeriod);
+        accountsListAdapter = new AccountsListAdapter(downloadedPreviousReadingsList, ReadingConsoleActivity.this, servicePeriod, userId);
         readingListBottomSheetRecyclerview.setAdapter(accountsListAdapter);
         readingListBottomSheetRecyclerview.setLayoutManager(new LinearLayoutManager(ReadingConsoleActivity.this));
 
@@ -494,6 +494,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
                         Intent intent = new Intent(ReadingConsoleActivity.this, ReadingFormActivity.class);
                         intent.putExtra("ID", symbol.getData().getAsJsonObject().get("id").getAsString());
                         intent.putExtra("SERVICEPERIOD", servicePeriod);
+                        intent.putExtra("USERID", userId);
                         startActivity(intent);
                     }
                 });

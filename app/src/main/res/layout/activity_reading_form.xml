@@ -144,6 +144,41 @@
 
                     </RelativeLayout>
 
+                    <RadioGroup
+                        android:id="@+id/fieldStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/stuckUp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="STUCK-UP"
+                            android:layout_marginRight="15dp"
+                            android:layout_marginLeft="15dp"
+                            android:paddingBottom="5dp"/>
+
+                        <RadioButton
+                            android:id="@+id/notInUse"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NOT IN USE"
+                            android:layout_marginRight="15dp"
+                            android:layout_marginLeft="15dp"
+                            android:paddingBottom="5dp"/>
+
+                        <RadioButton
+                            android:id="@+id/noDisplay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NO DISPLAY"
+                            android:layout_marginRight="15dp"
+                            android:layout_marginLeft="15dp"
+                            android:paddingBottom="5dp"/>
+
+                    </RadioGroup>
+
                     <EditText
                         android:id="@+id/notes"
                         android:layout_width="match_parent"
@@ -154,6 +189,15 @@
                         android:lines="2"
                         android:layout_marginTop="10dp"
                         android:hint="Remarks/Notes/Comments"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/takePhotoButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Take Photo"
+                        android:drawableLeft="@drawable/ic_baseline_photo_camera_24"
+                        android:layout_marginTop="15dp"
+                        app:backgroundTint="@color/red"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/billBtn"
@@ -324,6 +368,52 @@
 
                         </TableRow>
 
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Coreloss"
+                                android:layout_weight="1"
+                                android:layout_column="1"/>
+
+                            <TextView
+                                android:id="@+id/coreloss"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="..."
+                                android:textColor="?attr/textFillColor"
+                                android:gravity="right"
+                                android:layout_weight="2"
+                                android:layout_column="50"/>
+
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Multiplier"
+                                android:layout_weight="1"
+                                android:layout_column="1"/>
+
+                            <TextView
+                                android:id="@+id/multiplier"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="..."
+                                android:textColor="?attr/textFillColor"
+                                android:gravity="right"
+                                android:layout_weight="2"
+                                android:layout_column="50"/>
+
+                        </TableRow>
+
                     </TableLayout>
 
                 </LinearLayout>
@@ -335,6 +425,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 app:mapbox_cameraZoom="13" />
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/imageFields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                app:flexWrap="wrap"/>
 
         </LinearLayout>
 
