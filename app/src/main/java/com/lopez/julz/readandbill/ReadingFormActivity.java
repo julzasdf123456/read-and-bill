@@ -208,6 +208,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                             reading.setFieldStatus(ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()));
                             reading.setUploadStatus("UPLOADABLE");
                             reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                            reading.setMeterReader(userId);
                             if (locationComponent != null) {
                                 try {
                                     reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
@@ -244,6 +245,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                                 reading.setFieldStatus("OVERREADING");
                                                 reading.setUploadStatus("UPLOADABLE");
                                                 reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                                reading.setMeterReader(userId);
                                                 if (locationComponent != null) {
                                                     try {
                                                         reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
@@ -271,6 +273,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                 reading.setNotes(notes.getText().toString());
                                 reading.setUploadStatus("UPLOADABLE");
                                 reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                reading.setMeterReader(userId);
                                 if (locationComponent != null) {
                                     try {
                                         reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
@@ -827,7 +830,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                 double netAmount = ((kwhConsumed * multiplier) + coreloss) * Double.valueOf(currentRate.getTotalRateVATIncluded());
                                 currentBill.setNetAmount(netAmount + "");
                                 currentBill.setBillingDate(ObjectHelpers.getCurrentDate());
-                                currentBill.setServiceDateFrom(ReadingHelpers.getServiceFromToday());
+                                currentBill.setServiceDateFrom(ReadingHelpers.getServiceFromToday()); // CHANGE BASED ON PREVIOUS MONTH
                                 currentBill.setServiceDateTo(ReadingHelpers.getServiceTo());
                                 currentBill.setDueDate(ReadingHelpers.getDueDate(servicePeriod));
                                 currentBill.setMeterNumber(""); // TO BE ADDED

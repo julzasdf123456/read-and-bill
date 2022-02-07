@@ -41,9 +41,12 @@ public class Readings {
     @ColumnInfo(name = "FieldStatus")
     private String FieldStatus;
 
+    @ColumnInfo(name = "MeterReader")
+    private String MeterReader;
+
     public Readings() {}
 
-    public Readings(@NonNull String id, String accountNumber, String servicePeriod, String readingTimestamp, String kwhUsed, String demandKwhUsed, String notes, String latitude, String longitude, String uploadStatus, String fieldStatus) {
+    public Readings(@NonNull String id, String accountNumber, String servicePeriod, String readingTimestamp, String kwhUsed, String demandKwhUsed, String notes, String latitude, String longitude, String uploadStatus, String fieldStatus, String meterReader) {
         this.id = id;
         AccountNumber = accountNumber;
         ServicePeriod = servicePeriod;
@@ -55,6 +58,7 @@ public class Readings {
         Longitude = longitude;
         UploadStatus = uploadStatus;
         FieldStatus = fieldStatus;
+        MeterReader = meterReader;
     }
 
     @NonNull
@@ -144,5 +148,13 @@ public class Readings {
 
     public void setFieldStatus(String fieldStatus) {
         FieldStatus = fieldStatus;
+    }
+
+    public String getMeterReader() {
+        return MeterReader;
+    }
+
+    public void setMeterReader(String meterReader) {
+        MeterReader = meterReader;
     }
 }
