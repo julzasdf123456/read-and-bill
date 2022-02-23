@@ -62,7 +62,6 @@ public class DisconnectionListActivity extends AppCompatActivity {
         areaCode = findViewById(R.id.area);
         servicePeriod.setText(ObjectHelpers.formatShortDate(period));
         areaCode.setText("Area: " + area);
-        new GetDisconnectionList().execute();
     }
 
     @Override
