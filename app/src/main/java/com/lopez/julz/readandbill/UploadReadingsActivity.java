@@ -1,4 +1,4 @@
-package com.lopez.julz.readandbill.adapters;
+package com.lopez.julz.readandbill;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,11 +11,9 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.lopez.julz.readandbill.R;
 import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
@@ -26,6 +24,7 @@ import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,38 +147,47 @@ public class UploadReadingsActivity extends AppCompatActivity {
 
     public void uploadReadings() {
         try {
-            Call<Readings> readingsCall = requestPlaceHolder.uploadReadings(readingsList.get(0));
-            Log.e("UPLD_READING", readingsList.get(0).getAccountNumber());
+            if (readingsList.size() > 0) {
+                Call<Readings> readingsCall = requestPlaceHolder.uploadReadings(readingsList.get(0));
+                Log.e("UPLD_READING", readingsList.get(0).getAccountNumber());
 
-            readingsCall.enqueue(new Callback<Readings>() {
-                @Override
-                public void onResponse(Call<Readings> call, Response<Readings> response) {
-                    if (response.isSuccessful()) {
-                        new UpdateReadings().execute(readingsList.get(0));
-                        uploadProgress.setProgress(progress);
+                readingsCall.enqueue(new Callback<Readings>() {
+                    @Override
+                    public void onResponse(Call<Readings> call, Response<Readings> response) {
+                        if (response.isSuccessful()) {
+                            new UpdateReadings().execute(readingsList.get(0));
+                            uploadProgress.setProgress(progress);
 
-                        readingsList.remove(0);
+                            readingsList.remove(0);
 
-                        progress += 1;
+                            progress += 1;
 
-                        if (readingsList.size() > 0) {
-                            uploadReadings();
-                        } else {
-                            progress = 1;
-                            uploadProgress.setProgress(0);
-                            uploadProgress.setMax(billsList.size());
-                            uploadStatusText.setText("Uploading Bills...");
-                            uploadBills();
+                            if (readingsList.size() > 0) {
+                                uploadReadings();
+                            } else {
+                                progress = 1;
+                                uploadProgress.setProgress(0);
+                                uploadProgress.setMax(billsList.size());
+                                uploadStatusText.setText("Uploading Bills...");
+                                uploadBills();
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<Readings> call, Throwable t) {
-                    Log.e("ERR_UPLD_READINGS", t.getMessage());
-                    AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Readings Upload Failed", t.getMessage());
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Readings> call, Throwable t) {
+                        Log.e("ERR_UPLD_READINGS", t.getMessage());
+                        AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Readings Upload Failed", t.getMessage());
+                    }
+                });
+            } else {
+                progress = 1;
+                uploadProgress.setProgress(0);
+                uploadProgress.setMax(billsList.size());
+                uploadStatusText.setText("Uploading Bills...");
+                uploadBills();
+            }
+
         } catch (Exception e) {
             Log.e("ERR_UPLD_READINGS", e.getMessage());
             AlertHelpers.showMessageDialog(this, "Readings Upload Failed", e.getMessage());
@@ -188,38 +196,46 @@ public class UploadReadingsActivity extends AppCompatActivity {
 
     public void uploadBills() {
         try {
-            Call<Bills> billsCall = requestPlaceHolder.uploadBills(billsList.get(0));
-            Log.e("UPLD_BILL", billsList.get(0).getAccountNumber());
+            if (billsList.size() > 0) {
+                Call<Bills> billsCall = requestPlaceHolder.uploadBills(billsList.get(0));
+                Log.e("UPLD_BILL", billsList.get(0).getAccountNumber());
 
-            billsCall.enqueue(new Callback<Bills>() {
-                @Override
-                public void onResponse(Call<Bills> call, Response<Bills> response) {
-                    if (response.isSuccessful()) {
-                        new UpdateBills().execute(billsList.get(0));
-                        uploadProgress.setProgress(progress);
+                billsCall.enqueue(new Callback<Bills>() {
+                    @Override
+                    public void onResponse(Call<Bills> call, Response<Bills> response) {
+                        if (response.isSuccessful()) {
+                            new UpdateBills().execute(billsList.get(0));
+                            uploadProgress.setProgress(progress);
 
-                        billsList.remove(0);
+                            billsList.remove(0);
 
-                        progress += 1;
+                            progress += 1;
 
-                        if (billsList.size() > 0) {
-                            uploadBills();
-                        } else {
-                            progress = 1;
-                            uploadProgress.setProgress(0);
-                            uploadProgress.setMax(billsList.size());
-                            uploadStatusText.setText("Uploading Images...");
-                            uploadImages();
+                            if (billsList.size() > 0) {
+                                uploadBills();
+                            } else {
+                                progress = 1;
+                                uploadProgress.setProgress(0);
+                                uploadProgress.setMax(billsList.size());
+                                uploadStatusText.setText("Uploading Images...");
+                                uploadImages();
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<Bills> call, Throwable t) {
-                    Log.e("ERR_UPLD_BILLS", t.getMessage());
-                    AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Bills Upload Failed", t.getMessage());
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Bills> call, Throwable t) {
+                        Log.e("ERR_UPLD_BILLS", t.getMessage());
+                        AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Bills Upload Failed", t.getMessage());
+                    }
+                });
+            } else {
+                progress = 1;
+                uploadProgress.setProgress(0);
+                uploadProgress.setMax(billsList.size());
+                uploadStatusText.setText("Uploading Images...");
+                uploadImages();
+            }
         } catch (Exception e) {
             Log.e("ERR_UPLD_BILLS", e.getMessage());
             AlertHelpers.showMessageDialog(this, "Bills Upload Failed", e.getMessage());
@@ -257,6 +273,12 @@ public class UploadReadingsActivity extends AppCompatActivity {
                                     uploadProgress.setProgress(0);
                                     uploadStatusText.setText("Uploading Complete");
                                 }
+                            } else {
+                                try {
+                                    Log.e("ERR_UPLD_IMGS", response.raw() + "" + response.errorBody().string());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
 
@@ -266,7 +288,25 @@ public class UploadReadingsActivity extends AppCompatActivity {
                             AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Images Upload Failed", t.getMessage());
                         }
                     });
+                } else {
+                    uploadProgress.setProgress(progress);
+
+                    imagesList.remove(0);
+
+                    progress += 1;
+
+                    if (imagesList.size() > 0) {
+                        uploadImages();
+                    } else {
+                        progress = 1;
+                        uploadProgress.setProgress(0);
+                        uploadStatusText.setText("Uploading Complete");
+                    }
                 }
+            } else {
+                progress = 1;
+                uploadProgress.setProgress(0);
+                uploadStatusText.setText("Uploading Complete");
             }
 
         } catch (Exception e) {

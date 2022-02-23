@@ -16,6 +16,7 @@ import com.lopez.julz.readandbill.adapters.ReadingListAdapter;
 import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
+import com.lopez.julz.readandbill.dao.DownloadedPreviousReadings;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 
@@ -81,6 +82,38 @@ public class ReadingListActivity extends AppCompatActivity {
                 readingSchedulesList.addAll(db.readingSchedulesDao().getActiveSchedules());
             } catch (Exception e) {
                 Log.e("ERR_GET_ACTV_SCHD", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            new RemoveFinishedReadings().execute();
+        }
+    }
+
+    public class RemoveFinishedReadings extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                List<ReadingSchedules> listTmp = readingSchedulesList;
+                int size = listTmp.size();
+                List<String> stringList = new ArrayList<>();
+                stringList.add("READ");
+                for (int i=0; i<size; i++) {
+                    ReadingSchedules readingSchedules = listTmp.get(i);
+                    List<DownloadedPreviousReadings> dprList = db.downloadedPreviousReadingsDao().getAllUnread(readingSchedules.getServicePeriod(), readingSchedules.getAreaCode(), readingSchedules.getGroupCode());
+//                    Log.e("TEST", dprList.size() +"");
+                    if (dprList.size() > 0) {
+
+                    } else {
+                        readingSchedulesList.remove(i);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("ERR_REMOVE_FINISHED_RED", e.getMessage());
             }
             return null;
         }

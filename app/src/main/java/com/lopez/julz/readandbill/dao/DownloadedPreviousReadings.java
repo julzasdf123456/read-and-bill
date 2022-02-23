@@ -59,10 +59,25 @@ public class DownloadedPreviousReadings {
     @ColumnInfo(name = "Status")
     private String Status;
 
+    @ColumnInfo(name = "SeniorCitizen")
+    private String SeniorCitizen;
+
+    @ColumnInfo(name = "Evat5Percent")
+    private String Evat5Percent;
+
+    @ColumnInfo(name = "Ewt2Percent")
+    private String Ewt2Percent;
+
+    @ColumnInfo(name = "Balance")
+    private String Balance;
+
+    @ColumnInfo(name = "ArrearsLedger")
+    private String ArrearsLedger;
+
     public DownloadedPreviousReadings() {
     }
 
-    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status) {
+    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger) {
         this.id = id;
         ServiceAccountName = serviceAccountName;
         Multiplier = multiplier;
@@ -80,6 +95,11 @@ public class DownloadedPreviousReadings {
         ServicePeriod = servicePeriod;
         SequenceCode = sequenceCode;
         Status = status;
+        SeniorCitizen = seniorCitizen;
+        Evat5Percent = evat5Percent;
+        Ewt2Percent = ewt2Percent;
+        Balance = balance;
+        ArrearsLedger = arrearsLedger;
     }
 
     @NonNull
@@ -217,5 +237,45 @@ public class DownloadedPreviousReadings {
 
     public void setStatus(String status) {
         Status = status;
+    }
+
+    public String getSeniorCitizen() {
+        return SeniorCitizen;
+    }
+
+    public void setSeniorCitizen(String seniorCitizen) {
+        SeniorCitizen = seniorCitizen;
+    }
+
+    public String getEvat5Percent() {
+        return Evat5Percent;
+    }
+
+    public void setEvat5Percent(String evat5Percent) {
+        Evat5Percent = evat5Percent;
+    }
+
+    public String getEwt2Percent() {
+        return Ewt2Percent;
+    }
+
+    public void setEwt2Percent(String ewt2Percent) {
+        Ewt2Percent = ewt2Percent;
+    }
+
+    public String getBalance() {
+        return Balance;
+    }
+
+    public void setBalance(String balance) {
+        Balance = balance;
+    }
+
+    public String getArrearsLedger() {
+        return ArrearsLedger;
+    }
+
+    public void setArrearsLedger(String arrearsLedger) {
+        ArrearsLedger = arrearsLedger;
     }
 }

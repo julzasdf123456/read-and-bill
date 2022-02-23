@@ -12,7 +12,8 @@ import java.util.GregorianCalendar;
 public class ReadingHelpers {
     public static String getKwhUsed(DownloadedPreviousReadings dprPrev, Double current) {
         try {
-            Double prev = Double.valueOf(dprPrev.getKwhUsed());
+            String kwUsed = dprPrev.getKwhUsed() != null ? dprPrev.getKwhUsed() : "0";
+            Double prev = Double.valueOf(kwUsed);
             return (current - prev) + "";
         } catch (Exception e) {
             Log.e("ERR_GET_KWH", e.getMessage());
@@ -75,8 +76,8 @@ public class ReadingHelpers {
             servicePeriod = servicePeriod.substring(0, 6) + "-23";
             Calendar c = new GregorianCalendar();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            c.setTime(sdf.parse(servicePeriod));
-            c.add(Calendar.DATE, +12);
+            c.setTime(new Date());
+            c.add(Calendar.DATE, +9);
             return sdf.format(c.getTime());
         } catch (Exception e) {
             Log.e("ERR_GEN_SVC_FROM", e.getMessage());

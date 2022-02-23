@@ -168,7 +168,11 @@ public class DownloadReadingListAdapter extends RecyclerView.Adapter<DownloadRea
                 @Override
                 public void onResponse(Call<List<Rates>> call, Response<List<Rates>> response) {
                     if (response.isSuccessful()) {
-                        new SaveRates().execute(response.body());
+                        if (response.body() != null) {
+                            new SaveRates().execute(response.body());
+                        } else {
+
+                        }
                     }
                 }
 

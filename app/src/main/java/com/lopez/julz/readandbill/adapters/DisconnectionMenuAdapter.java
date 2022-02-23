@@ -24,13 +24,13 @@ import com.lopez.julz.readandbill.objects.HomeMenu;
 
 import java.util.List;
 
-public class HomeMenuAdapter extends RecyclerView.Adapter<HomeMenuAdapter.ViewHolder> {
+public class DisconnectionMenuAdapter  extends RecyclerView.Adapter<DisconnectionMenuAdapter.ViewHolder>{
 
     public List<HomeMenu> homeMenuList;
     public Context context;
     public String userId;
 
-    public HomeMenuAdapter(List<HomeMenu> homeMenuList, Context context, String userId) {
+    public DisconnectionMenuAdapter(List<HomeMenu> homeMenuList, Context context, String userId) {
         this.homeMenuList = homeMenuList;
         this.context = context;
         this.userId = userId;
@@ -38,16 +38,16 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<HomeMenuAdapter.ViewHo
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public DisconnectionMenuAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View view = inflater.inflate(R.layout.recyclerview_layout_menu, parent, false);
 
-        return new ViewHolder(view);
+        return new DisconnectionMenuAdapter.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull DisconnectionMenuAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         HomeMenu homeMenu = homeMenuList.get(position);
 
         holder.title.setText(homeMenu.getTitle());
@@ -66,12 +66,6 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<HomeMenuAdapter.ViewHo
                     Intent intent = new Intent(context, ReadingListActivity.class);
                     intent.putExtra("USERID", userId);
                     context.startActivity(intent);
-                } else if (position == 3) { // reading tracks
-                    context.startActivity(new Intent(context, CreateTracksActivity.class));
-                } else if (position == 4) {
-                    Intent intent = new Intent(context, DisconnectionHomeActivity.class);
-                    intent.putExtra("USERID", userId);
-                    context.startActivity(intent);
                 }
             }
         });
@@ -83,7 +77,6 @@ public class HomeMenuAdapter extends RecyclerView.Adapter<HomeMenuAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-
         public ImageView imageView;
         public TextView title;
         public MaterialCardView parent;

@@ -94,7 +94,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
      * FORM
      */
     public EditText prevReading, presReading, notes;
-    public TextView kwhUsed, accountType, rate, sequenceCode, accountStatus, coreloss, multiplier;
+    public TextView kwhUsed, accountType, rate, sequenceCode, accountStatus, coreloss, multiplier, seniorCitizen, currentArrears, totalArrears;
     public MaterialButton billBtn, nextBtn, prevBtn, takePhotoButton;
     public RadioGroup fieldStatus;
 
@@ -154,6 +154,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         fieldStatus = findViewById(R.id.fieldStatus);
         takePhotoButton = findViewById(R.id.takePhotoButton);
         imageFields = findViewById(R.id.imageFields);
+        seniorCitizen = findViewById(R.id.seniorCitizen);
+        currentArrears = findViewById(R.id.currentArrears);
+        totalArrears = findViewById(R.id.totalArrears);
 
         fieldStatus.setVisibility(View.GONE);
         takePhotoButton.setVisibility(View.GONE);
@@ -219,10 +222,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                             }
                             new ReadAndBill().execute(reading);
                         } else {
-                            if (kwhConsumed > (Double.valueOf(currentDpr.getKwhUsed()) * 2)) {
+                            String prevKwh = currentDpr.getKwhUsed() != null ? currentDpr.getKwhUsed() : "0";
+                            if (kwhConsumed > (Double.valueOf(prevKwh) * 2)) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
                                 builder.setTitle("WARNING")
-                                        .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo(((kwhConsumed / Double.valueOf(currentDpr.getKwhUsed())) * 100)) + "%. Do you wish to proceed?")
+                                        .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo(((kwhConsumed / Double.valueOf(prevKwh)) * 100)) + "%. Do you wish to proceed?")
                                         .setNegativeButton("REVIEW READING", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -292,6 +296,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                     }
                 } catch (Exception e) {
                     Log.e("ERR_COMP", e.getMessage());
+                    e.printStackTrace();
                     Toast.makeText(ReadingFormActivity.this, "No inputted present reading!", Toast.LENGTH_SHORT).show();
                 }
 
@@ -320,6 +325,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                              */
                             fieldStatus.setVisibility(View.VISIBLE);
                             fieldStatus.check(R.id.stuckUp);
+                            takePhotoButton.setEnabled(true);
                             revealPhotoButton(true);
                         } else {
                             kwhUsed.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
@@ -532,6 +538,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             accountStatus.setText(currentDpr.getAccountStatus());
             multiplier.setText(currentDpr.getMultiplier());
             coreloss.setText(currentDpr.getCoreloss());
+            seniorCitizen.setText(currentDpr.getSeniorCitizen() != null ? currentDpr.getSeniorCitizen() : "No");
+            currentArrears.setText(currentDpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getArrearsLedger())) : "0.0");
+            totalArrears.setText(currentDpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getBalance())) : "0.0");
 
             if (currentDpr.getAccountStatus().equals("DISCONNECTED")) {
                 billBtn.setEnabled(false);
@@ -547,15 +556,24 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 notes.setText(currentReading.getNotes());
                 kwhUsed.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_check_circle_18), null, null, null);
                 setSelectedStatus(currentReading.getFieldStatus());
+
                 if (currentReading.getUploadStatus().equals("UPLOADED")) {
                     billBtn.setEnabled(false);
+                    takePhotoButton.setEnabled(false);
                 } else {
                     billBtn.setEnabled(true);
+                    takePhotoButton.setEnabled(true);
+
+                    /**
+                     * SHOW TAKE PHOTO BUTTON
+                     */
+                    revealPhotoButton(true);
                 }
             } else {
                 presReading.setText("");
                 notes.setText("");
                 kwhUsed.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+                revealPhotoButton(false);
             }
 
             new GetPhotos().execute();
@@ -622,6 +640,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             accountStatus.setText(currentDpr.getAccountStatus());
             multiplier.setText(currentDpr.getMultiplier());
             coreloss.setText(currentDpr.getCoreloss());
+            seniorCitizen.setText(currentDpr.getSeniorCitizen() != null ? currentDpr.getSeniorCitizen() : "No");
+            currentArrears.setText(currentDpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getArrearsLedger())) : "0.0");
+            totalArrears.setText(currentDpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getBalance())) : "0.0");
 
             prevBtn.setEnabled(true);
             nextBtn.setEnabled(true);
@@ -642,15 +663,24 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 notes.setText(currentReading.getNotes());
                 kwhUsed.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_check_circle_18), null, null, null);
                 setSelectedStatus(currentReading.getFieldStatus());
+
                 if (currentReading.getUploadStatus().equals("UPLOADED")) {
                     billBtn.setEnabled(false);
+                    takePhotoButton.setEnabled(false);
                 } else {
                     billBtn.setEnabled(true);
+                    takePhotoButton.setEnabled(true);
+
+                    /**
+                     * SHOW TAKE PHOTO BUTTON
+                     */
+                    revealPhotoButton(true);
                 }
             } else {
                 presReading.setText("");
                 notes.setText("");
                 kwhUsed.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+                revealPhotoButton(false);
             }
 
             new GetPhotos().execute();
@@ -739,7 +769,16 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                     Readings reading = readings[0];
                     if (reading != null) {
                         /** INSERT READING **/
-                        db.readingsDao().insertAll(reading);
+                        if (currentReading != null) {
+                            currentReading.setKwhUsed(reading.getKwhUsed());
+                            currentReading.setNotes("PERFORMED RE-READING");
+                            currentReading.setLatitude(reading.getLatitude());
+                            currentReading.setLongitude(reading.getLongitude());
+                            db.readingsDao().updateAll(currentReading);
+                        } else {
+                            db.readingsDao().insertAll(reading);
+                        }
+
 
                         /** UPDATE STATUS OF DOWNLOADED READING **/
                         currentDpr.setStatus("READ");
@@ -760,13 +799,23 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                 currentBill.setKwhAmount((Double.valueOf(currentRate.getTotalRateVATIncluded()) * kwhConsumed) + "");
                                 currentBill.setEffectiveRate(currentRate.getTotalRateVATIncluded());
                                 currentBill.setAdditionalCharges(null); // TO BE ADDED
-                                currentBill.setDeductions(null); // TO BE ADDED
 
                                 // GENERATE NET AMOUNT
                                 double multiplier = currentDpr.getMultiplier() != null ? Double.valueOf(currentDpr.getMultiplier()) : 1;
                                 double coreloss = currentDpr.getCoreloss() != null ? Double.valueOf(currentDpr.getCoreloss()) : 0;
                                 double netAmount = ((kwhConsumed * multiplier) + coreloss) * Double.valueOf(currentRate.getTotalRateVATIncluded());
-                                currentBill.setNetAmount(netAmount + "");
+                                double seniorCitizen = netAmount * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSeniorCitizenSubsidy()));
+                                double arrears = currentDpr.getArrearsLedger() != null ? Double.valueOf(currentDpr.getArrearsLedger()) : 0;
+                                double addOns = arrears;
+                                double deductions = seniorCitizen;
+                                if (currentDpr.getSeniorCitizen() != null && currentDpr.getSeniorCitizen().equals("Yes") && kwhConsumed < 101) {
+                                    currentBill.setSeniorCitizenSubsidy(ObjectHelpers.roundFourNoComma(seniorCitizen));
+                                    currentBill.setDeductions(ObjectHelpers.roundFourNoComma(deductions)); // TO BE ADDED
+                                    netAmount = netAmount - Double.valueOf(ObjectHelpers.doubleStringNull(currentBill.getDeductions()));
+                                }
+                                netAmount = netAmount + addOns;
+                                currentBill.setAdditionalCharges(ObjectHelpers.roundFourNoComma(addOns));
+                                currentBill.setNetAmount(ObjectHelpers.roundFourNoComma(netAmount));
                                 currentBill.setBillingDate(ObjectHelpers.getCurrentDate());
                                 currentBill.setServiceDateFrom(ReadingHelpers.getServiceFromToday());
                                 currentBill.setServiceDateTo(ReadingHelpers.getServiceTo());
@@ -822,13 +871,23 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                 currentBill.setKwhAmount((Double.valueOf(currentRate.getTotalRateVATIncluded()) * kwhConsumed) + "");
                                 currentBill.setEffectiveRate(currentRate.getTotalRateVATIncluded());
                                 currentBill.setAdditionalCharges(null); // TO BE ADDED
-                                currentBill.setDeductions(null); // TO BE ADDED
 
                                 // GENERATE NET AMOUNT
                                 double multiplier = currentDpr.getMultiplier() != null ? Double.valueOf(currentDpr.getMultiplier()) : 1;
                                 double coreloss = currentDpr.getCoreloss() != null ? Double.valueOf(currentDpr.getCoreloss()) : 0;
                                 double netAmount = ((kwhConsumed * multiplier) + coreloss) * Double.valueOf(currentRate.getTotalRateVATIncluded());
-                                currentBill.setNetAmount(netAmount + "");
+                                double seniorCitizen = netAmount * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSeniorCitizenSubsidy()));
+                                double arrears = currentDpr.getArrearsLedger() != null ? Double.valueOf(currentDpr.getArrearsLedger()) : 0;
+                                double addOns = arrears;
+                                double deductions = seniorCitizen;
+                                if (currentDpr.getSeniorCitizen() != null && currentDpr.getSeniorCitizen().equals("Yes") && kwhConsumed < 101) {
+                                    currentBill.setSeniorCitizenSubsidy(ObjectHelpers.roundFourNoComma(seniorCitizen));
+                                    currentBill.setDeductions(ObjectHelpers.roundFourNoComma(deductions));
+                                    netAmount = netAmount - Double.valueOf(ObjectHelpers.doubleStringNull(currentBill.getDeductions()));
+                                }
+                                netAmount = netAmount + addOns;
+                                currentBill.setAdditionalCharges(ObjectHelpers.roundFourNoComma(addOns));
+                                currentBill.setNetAmount(ObjectHelpers.roundFourNoComma(netAmount));
                                 currentBill.setBillingDate(ObjectHelpers.getCurrentDate());
                                 currentBill.setServiceDateFrom(ReadingHelpers.getServiceFromToday()); // CHANGE BASED ON PREVIOUS MONTH
                                 currentBill.setServiceDateTo(ReadingHelpers.getServiceTo());
@@ -1002,45 +1061,51 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             super.onPostExecute(unused);
 
             if (photosList != null) {
-                revealPhotoButton(false);
+//                revealPhotoButton(false);
                 for (int i = 0; i < photosList.size(); i++) {
                     File file = new File(photosList.get(i).getPhoto());
                     if (file.exists()) {
-                        Log.e("TEST", file.getPath());
-                        Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
-                        Bitmap scaledBmp = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 8, bitmap.getHeight() / 8, true);
-                        ImageView imageView = new ImageView(ReadingFormActivity.this);
-                        Constraints.LayoutParams layoutParams = new Constraints.LayoutParams(scaledBmp.getWidth(), scaledBmp.getHeight());
-                        imageView.setLayoutParams(layoutParams);
-                        imageView.setPadding(0, 5, 5, 0);
-                        imageView.setImageBitmap(scaledBmp);
-                        imageFields.addView(imageView);
+                        try {
+                            Log.e("TEST", file.getPath());
+                            Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
+                            Bitmap scaledBmp = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 8, bitmap.getHeight() / 8, true);
+                            ImageView imageView = new ImageView(ReadingFormActivity.this);
+                            Constraints.LayoutParams layoutParams = new Constraints.LayoutParams(scaledBmp.getWidth(), scaledBmp.getHeight());
+                            imageView.setLayoutParams(layoutParams);
+                            imageView.setPadding(0, 5, 5, 0);
+                            imageView.setImageBitmap(scaledBmp);
+                            imageFields.addView(imageView);
 
-                        imageView.setOnLongClickListener(new View.OnLongClickListener() {
-                            @Override
-                            public boolean onLongClick(View v) {
-                                PopupMenu popup = new PopupMenu(ReadingFormActivity.this, imageView);
-                                //inflating menu from xml resource
-                                popup.inflate(R.menu.image_menu);
-                                //adding click listener
-                                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                    @Override
-                                    public boolean onMenuItemClick(MenuItem item) {
-                                        switch (item.getItemId()) {
-                                            case R.id.delete_img:
-                                                file.delete();
-                                                new GetPhotos().execute();
-                                                return true;
-                                            default:
-                                                return false;
+                            imageView.setOnLongClickListener(new View.OnLongClickListener() {
+                                @Override
+                                public boolean onLongClick(View v) {
+                                    PopupMenu popup = new PopupMenu(ReadingFormActivity.this, imageView);
+                                    //inflating menu from xml resource
+                                    popup.inflate(R.menu.image_menu);
+                                    //adding click listener
+                                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                        @Override
+                                        public boolean onMenuItemClick(MenuItem item) {
+                                            switch (item.getItemId()) {
+                                                case R.id.delete_img:
+                                                    file.delete();
+                                                    new GetPhotos().execute();
+                                                    return true;
+                                                default:
+                                                    return false;
+                                            }
                                         }
-                                    }
-                                });
-                                //displaying the popup
-                                popup.show();
-                                return false;
-                            }
-                        });
+                                    });
+                                    //displaying the popup
+                                    popup.show();
+                                    return false;
+                                }
+                            });
+                        } catch (Exception e) {
+                            Log.e("ERR_GET_PHOTOS", e.getMessage());
+                            Toast.makeText(ReadingFormActivity.this, "An error occurred while fetching photos", Toast.LENGTH_SHORT).show();
+                        }
+
                     } else {
                         Log.e("ERR_RETRV_FILE", "Error retriveing file");
                     }

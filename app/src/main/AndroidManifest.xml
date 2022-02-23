@@ -7,9 +7,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -20,7 +20,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ReadAndBill">
         <activity
-            android:name=".adapters.UploadReadingsActivity"
+            android:name=".DisconnectionHomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ReadAndBillFullScreen" />
+        <activity
+            android:name=".UploadReadingsActivity"
             android:exported="true" />
         <activity
             android:name=".ReadingFormActivity"
@@ -64,14 +68,15 @@
         <activity
             android:name=".RecordTracksActivity"
             android:exported="true" />
+
         <provider
-            android:authorities="com.lopez.julz.readandbill"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="com.lopez.julz.readandbill"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
     </application>
 

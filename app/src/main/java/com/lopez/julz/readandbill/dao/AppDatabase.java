@@ -16,7 +16,7 @@ import java.util.List;
         Rates.class,
         Bills.class,
         ReadingImages.class,
-    }, version = 35)
+    }, version = 41)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract TrackNamesDao trackNamesDao();
 

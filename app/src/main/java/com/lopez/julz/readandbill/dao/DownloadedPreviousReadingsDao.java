@@ -39,4 +39,7 @@ public interface DownloadedPreviousReadingsDao {
 
     @Query("SELECT * FROM DownloadedPreviousReadings WHERE AreaCode = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
     DownloadedPreviousReadings getLast(String areaCode, String groupCode);
+
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND AreaCode = :areaCode AND GroupCode = :groupCode AND Status IS NULL")
+    List<DownloadedPreviousReadings> getAllUnread(String servicePeriod, String areaCode, String groupCode);
 }
