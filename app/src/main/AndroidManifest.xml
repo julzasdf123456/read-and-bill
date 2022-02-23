@@ -20,6 +20,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ReadAndBill">
         <activity
+            android:name=".UploadDisconnectionActivity"
+            android:exported="true" />
+        <activity
+            android:name=".DisconnectionFormActivity"
+            android:exported="true" />
+        <activity
+            android:name=".DisconnectionListActivity"
+            android:exported="true" />
+        <activity
+            android:name=".DisconnectionMenuListActivity"
+            android:exported="true" />
+        <activity
+            android:name=".DownloadDisconnectionListActivity"
+            android:exported="true" />
+        <activity
             android:name=".DisconnectionHomeActivity"
             android:exported="true"
             android:theme="@style/Theme.ReadAndBillFullScreen" />

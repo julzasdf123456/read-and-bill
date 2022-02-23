@@ -1,6 +1,7 @@
 package com.lopez.julz.readandbill.api;
 
 import com.lopez.julz.readandbill.dao.Bills;
+import com.lopez.julz.readandbill.dao.DisconnectionList;
 import com.lopez.julz.readandbill.dao.DownloadedPreviousReadings;
 import com.lopez.julz.readandbill.dao.Rates;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
@@ -62,4 +63,13 @@ public interface RequestPlaceHolder {
     @Multipart
     @POST("save-reading-images")
     Call<ResponseBody> saveReadingImages(@Query("Id") String Id, @Query("ServicePeriod") String servicePeriod, @Query("AccountNumber") String AccountNumber, @Part MultipartBody.Part file);
+
+    /**
+     * DISCONNECTION
+     */
+    @GET("get-disconnection-list")
+    Call<List<DisconnectionList>> getDisconnectionList(@Query("ServicePeriod") String svcPeriod, @Query("Area") String area);
+
+    @POST("receive-disconnection-uploads")
+    Call<Void> uploadDisconnection(@Body DisconnectionList disconnectionList);
 }
