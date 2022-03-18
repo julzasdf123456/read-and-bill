@@ -83,7 +83,7 @@ public class DownloadReadingListActivity extends AppCompatActivity {
                         readingListAdapter.notifyDataSetChanged();
                     } else {
                         Toast.makeText(DownloadReadingListActivity.this, "An error occurred while fetching the schedules", Toast.LENGTH_SHORT).show();
-                        Log.e("ERR_FETCH_DATA", response.errorBody() + "");
+                        Log.e("ERR_FETCH_DATA", response.errorBody() + "" + response.raw());
                     }
                 }
 

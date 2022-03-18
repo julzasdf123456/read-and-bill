@@ -116,7 +116,7 @@ public class DownloadReadingListAdapter extends RecyclerView.Adapter<DownloadRea
                         DownloadList downloadList = new DownloadList(downloadProgress, downloadFab, downloadedPreviousReadingsList.size(), readingSchedules.getId(), position);
                         downloadList.execute(downloadedPreviousReadingsList);
                     } else {
-                        Log.e("ERR_FETCH_DATA", response.errorBody() + "");
+                        Log.e("ERR_FETCH_DATA", response.errorBody() + "" + response.raw());
                         Toast.makeText(context, "Error fetching data", Toast.LENGTH_SHORT).show();
                     }
                 }
