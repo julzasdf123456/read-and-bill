@@ -53,7 +53,7 @@ public class HomeActivity extends AppCompatActivity {
             homeMenuList.add(new HomeMenu(getDrawable(R.drawable.ic_baseline_cloud_upload_24), "Upload", "#ff7043"));
             homeMenuList.add(new HomeMenu(getDrawable(R.drawable.ic_baseline_data_thresholding_24), "Reading List", "#5c6bc0"));
             homeMenuList.add(new HomeMenu(getDrawable(R.drawable.ic_baseline_edit_location_alt_24), "Reading Tracks", "#78909c"));
-            homeMenuList.add(new HomeMenu(getDrawable(R.drawable.ic_baseline_domain_disabled_24), "Disconnection", "#f44336"));
+//            homeMenuList.add(new HomeMenu(getDrawable(R.drawable.ic_baseline_domain_disabled_24), "Disconnection", "#f44336"));
 
             homeMenuAdapter.notifyDataSetChanged();
         } catch (Exception e) {
