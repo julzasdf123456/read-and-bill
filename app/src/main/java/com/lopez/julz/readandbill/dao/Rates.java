@@ -119,10 +119,37 @@ public class Rates {
     @ColumnInfo(name = "AreaCode")
     private String AreaCode;
 
+    @ColumnInfo(name = "OtherGenerationRateAdjustment")
+    private String OtherGenerationRateAdjustment;
+
+    @ColumnInfo(name = "OtherTransmissionCostAdjustmentKW")
+    private String OtherTransmissionCostAdjustmentKW;
+
+    @ColumnInfo(name = "OtherTransmissionCostAdjustmentKWH")
+    private String OtherTransmissionCostAdjustmentKWH;
+
+    @ColumnInfo(name = "OtherSystemLossCostAdjustment")
+    private String OtherSystemLossCostAdjustment;
+
+    @ColumnInfo(name = "OtherLifelineRateCostAdjustment")
+    private String OtherLifelineRateCostAdjustment;
+
+    @ColumnInfo(name = "SeniorCitizenDiscountAndSubsidyAdjustment")
+    private String SeniorCitizenDiscountAndSubsidyAdjustment;
+
+    @ColumnInfo(name = "FranchiseTax")
+    private String FranchiseTax;
+
+    @ColumnInfo(name = "BusinessTax")
+    private String BusinessTax;
+
+    @ColumnInfo(name = "TotalRateVATExcludedWithAdjustments")
+    private String TotalRateVATExcludedWithAdjustments;
+
     public Rates() {
     }
 
-    public Rates(@NonNull String id, String rateFor, String consumerType, String servicePeriod, String notes, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String totalRateVATExcluded, String totalRateVATIncluded, String userId, String created_at, String updated_at, String realPropertyTax, String areaCode) {
+    public Rates(@NonNull String id, String rateFor, String consumerType, String servicePeriod, String notes, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String totalRateVATExcluded, String totalRateVATIncluded, String userId, String created_at, String updated_at, String realPropertyTax, String areaCode, String otherGenerationRateAdjustment, String otherTransmissionCostAdjustmentKW, String otherTransmissionCostAdjustmentKWH, String otherSystemLossCostAdjustment, String otherLifelineRateCostAdjustment, String seniorCitizenDiscountAndSubsidyAdjustment, String franchiseTax, String businessTax, String totalRateVATExcludedWithAdjustments) {
         this.id = id;
         RateFor = rateFor;
         ConsumerType = consumerType;
@@ -160,6 +187,15 @@ public class Rates {
         this.updated_at = updated_at;
         RealPropertyTax = realPropertyTax;
         AreaCode = areaCode;
+        OtherGenerationRateAdjustment = otherGenerationRateAdjustment;
+        OtherTransmissionCostAdjustmentKW = otherTransmissionCostAdjustmentKW;
+        OtherTransmissionCostAdjustmentKWH = otherTransmissionCostAdjustmentKWH;
+        OtherSystemLossCostAdjustment = otherSystemLossCostAdjustment;
+        OtherLifelineRateCostAdjustment = otherLifelineRateCostAdjustment;
+        SeniorCitizenDiscountAndSubsidyAdjustment = seniorCitizenDiscountAndSubsidyAdjustment;
+        FranchiseTax = franchiseTax;
+        BusinessTax = businessTax;
+        TotalRateVATExcludedWithAdjustments = totalRateVATExcludedWithAdjustments;
     }
 
     @NonNull
@@ -457,5 +493,77 @@ public class Rates {
 
     public void setAreaCode(String areaCode) {
         AreaCode = areaCode;
+    }
+
+    public String getOtherGenerationRateAdjustment() {
+        return OtherGenerationRateAdjustment;
+    }
+
+    public void setOtherGenerationRateAdjustment(String otherGenerationRateAdjustment) {
+        OtherGenerationRateAdjustment = otherGenerationRateAdjustment;
+    }
+
+    public String getOtherTransmissionCostAdjustmentKW() {
+        return OtherTransmissionCostAdjustmentKW;
+    }
+
+    public void setOtherTransmissionCostAdjustmentKW(String otherTransmissionCostAdjustmentKW) {
+        OtherTransmissionCostAdjustmentKW = otherTransmissionCostAdjustmentKW;
+    }
+
+    public String getOtherTransmissionCostAdjustmentKWH() {
+        return OtherTransmissionCostAdjustmentKWH;
+    }
+
+    public void setOtherTransmissionCostAdjustmentKWH(String otherTransmissionCostAdjustmentKWH) {
+        OtherTransmissionCostAdjustmentKWH = otherTransmissionCostAdjustmentKWH;
+    }
+
+    public String getOtherSystemLossCostAdjustment() {
+        return OtherSystemLossCostAdjustment;
+    }
+
+    public void setOtherSystemLossCostAdjustment(String otherSystemLossCostAdjustment) {
+        OtherSystemLossCostAdjustment = otherSystemLossCostAdjustment;
+    }
+
+    public String getOtherLifelineRateCostAdjustment() {
+        return OtherLifelineRateCostAdjustment;
+    }
+
+    public void setOtherLifelineRateCostAdjustment(String otherLifelineRateCostAdjustment) {
+        OtherLifelineRateCostAdjustment = otherLifelineRateCostAdjustment;
+    }
+
+    public String getSeniorCitizenDiscountAndSubsidyAdjustment() {
+        return SeniorCitizenDiscountAndSubsidyAdjustment;
+    }
+
+    public void setSeniorCitizenDiscountAndSubsidyAdjustment(String seniorCitizenDiscountAndSubsidyAdjustment) {
+        SeniorCitizenDiscountAndSubsidyAdjustment = seniorCitizenDiscountAndSubsidyAdjustment;
+    }
+
+    public String getFranchiseTax() {
+        return FranchiseTax;
+    }
+
+    public void setFranchiseTax(String franchiseTax) {
+        FranchiseTax = franchiseTax;
+    }
+
+    public String getBusinessTax() {
+        return BusinessTax;
+    }
+
+    public void setBusinessTax(String businessTax) {
+        BusinessTax = businessTax;
+    }
+
+    public String getTotalRateVATExcludedWithAdjustments() {
+        return TotalRateVATExcludedWithAdjustments;
+    }
+
+    public void setTotalRateVATExcludedWithAdjustments(String totalRateVATExcludedWithAdjustments) {
+        TotalRateVATExcludedWithAdjustments = totalRateVATExcludedWithAdjustments;
     }
 }

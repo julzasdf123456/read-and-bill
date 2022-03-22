@@ -201,4 +201,8 @@ public class ObjectHelpers {
             return new String[]{};
         }
     }
+
+    public static String generateIDandRandString() {
+        return getTimeInMillis() + "-" + generateRandomString();
+    }
 }

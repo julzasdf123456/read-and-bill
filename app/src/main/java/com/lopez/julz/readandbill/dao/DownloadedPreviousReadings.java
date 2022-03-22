@@ -74,10 +74,19 @@ public class DownloadedPreviousReadings {
     @ColumnInfo(name = "ArrearsLedger")
     private String ArrearsLedger;
 
+    @ColumnInfo(name = "MeterSerial")
+    private String MeterSerial;
+
+    @ColumnInfo(name = "ReadingTimestamp")
+    private String ReadingTimestamp;
+
+    @ColumnInfo(name = "ArrearsTotal")
+    private String ArrearsTotal;
+
     public DownloadedPreviousReadings() {
     }
 
-    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger) {
+    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal) {
         this.id = id;
         ServiceAccountName = serviceAccountName;
         Multiplier = multiplier;
@@ -100,6 +109,9 @@ public class DownloadedPreviousReadings {
         Ewt2Percent = ewt2Percent;
         Balance = balance;
         ArrearsLedger = arrearsLedger;
+        MeterSerial = meterSerial;
+        ReadingTimestamp = readingTimestamp;
+        ArrearsTotal = arrearsTotal;
     }
 
     @NonNull
@@ -277,5 +289,29 @@ public class DownloadedPreviousReadings {
 
     public void setArrearsLedger(String arrearsLedger) {
         ArrearsLedger = arrearsLedger;
+    }
+
+    public String getMeterSerial() {
+        return MeterSerial;
+    }
+
+    public void setMeterSerial(String meterSerial) {
+        MeterSerial = meterSerial;
+    }
+
+    public String getReadingTimestamp() {
+        return ReadingTimestamp;
+    }
+
+    public void setReadingTimestamp(String readingTimestamp) {
+        ReadingTimestamp = readingTimestamp;
+    }
+
+    public String getArrearsTotal() {
+        return ArrearsTotal;
+    }
+
+    public void setArrearsTotal(String arrearsTotal) {
+        ArrearsTotal = arrearsTotal;
     }
 }

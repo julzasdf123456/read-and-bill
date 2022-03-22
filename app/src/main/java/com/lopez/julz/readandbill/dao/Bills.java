@@ -164,6 +164,30 @@ public class Bills {
     @ColumnInfo(name = "RealPropertyTax")
     private String RealPropertyTax;
 
+    @ColumnInfo(name = "OtherGenerationRateAdjustment")
+    private String OtherGenerationRateAdjustment;
+
+    @ColumnInfo(name = "OtherTransmissionCostAdjustmentKW")
+    private String OtherTransmissionCostAdjustmentKW;
+
+    @ColumnInfo(name = "OtherTransmissionCostAdjustmentKWH")
+    private String OtherTransmissionCostAdjustmentKWH;
+
+    @ColumnInfo(name = "OtherSystemLossCostAdjustment")
+    private String OtherSystemLossCostAdjustment;
+
+    @ColumnInfo(name = "OtherLifelineRateCostAdjustment")
+    private String OtherLifelineRateCostAdjustment;
+
+    @ColumnInfo(name = "SeniorCitizenDiscountAndSubsidyAdjustment")
+    private String SeniorCitizenDiscountAndSubsidyAdjustment;
+
+    @ColumnInfo(name = "FranchiseTax")
+    private String FranchiseTax;
+
+    @ColumnInfo(name = "BusinessTax")
+    private String BusinessTax;
+
     @ColumnInfo(name = "Notes")
     private String Notes;
 
@@ -179,7 +203,7 @@ public class Bills {
     public Bills() {
     }
 
-    public Bills(@NonNull String id, String billNumber, String accountNumber, String servicePeriod, String multiplier, String coreloss, String kwhUsed, String previousKwh, String presentKwh, String demandPreviousKwh, String demandPresentKwh, String additionalKwh, String additionalDemandKwh, String kwhAmount, String effectiveRate, String additionalCharges, String deductions, String netAmount, String billingDate, String serviceDateFrom, String serviceDateTo, String dueDate, String meterNumber, String consumerType, String billType, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String realPropertyTax, String notes, String userId, String billedFrom) {
+    public Bills(@NonNull String id, String billNumber, String accountNumber, String servicePeriod, String multiplier, String coreloss, String kwhUsed, String previousKwh, String presentKwh, String demandPreviousKwh, String demandPresentKwh, String additionalKwh, String additionalDemandKwh, String kwhAmount, String effectiveRate, String additionalCharges, String deductions, String netAmount, String billingDate, String serviceDateFrom, String serviceDateTo, String dueDate, String meterNumber, String consumerType, String billType, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String realPropertyTax, String otherGenerationRateAdjustment, String otherTransmissionCostAdjustmentKW, String otherTransmissionCostAdjustmentKWH, String otherSystemLossCostAdjustment, String otherLifelineRateCostAdjustment, String seniorCitizenDiscountAndSubsidyAdjustment, String franchiseTax, String businessTax, String notes, String userId, String billedFrom, String uploadStatus) {
         this.id = id;
         BillNumber = billNumber;
         AccountNumber = accountNumber;
@@ -231,9 +255,18 @@ public class Bills {
         SystemLossVAT = systemLossVAT;
         DistributionVAT = distributionVAT;
         RealPropertyTax = realPropertyTax;
+        OtherGenerationRateAdjustment = otherGenerationRateAdjustment;
+        OtherTransmissionCostAdjustmentKW = otherTransmissionCostAdjustmentKW;
+        OtherTransmissionCostAdjustmentKWH = otherTransmissionCostAdjustmentKWH;
+        OtherSystemLossCostAdjustment = otherSystemLossCostAdjustment;
+        OtherLifelineRateCostAdjustment = otherLifelineRateCostAdjustment;
+        SeniorCitizenDiscountAndSubsidyAdjustment = seniorCitizenDiscountAndSubsidyAdjustment;
+        FranchiseTax = franchiseTax;
+        BusinessTax = businessTax;
         Notes = notes;
         UserId = userId;
         BilledFrom = billedFrom;
+        UploadStatus = uploadStatus;
     }
 
     public void setId(@NonNull String id) {
@@ -675,5 +708,69 @@ public class Bills {
 
     public void setUploadStatus(String uploadStatus) {
         UploadStatus = uploadStatus;
+    }
+
+    public String getOtherGenerationRateAdjustment() {
+        return OtherGenerationRateAdjustment;
+    }
+
+    public void setOtherGenerationRateAdjustment(String otherGenerationRateAdjustment) {
+        OtherGenerationRateAdjustment = otherGenerationRateAdjustment;
+    }
+
+    public String getOtherTransmissionCostAdjustmentKW() {
+        return OtherTransmissionCostAdjustmentKW;
+    }
+
+    public void setOtherTransmissionCostAdjustmentKW(String otherTransmissionCostAdjustmentKW) {
+        OtherTransmissionCostAdjustmentKW = otherTransmissionCostAdjustmentKW;
+    }
+
+    public String getOtherTransmissionCostAdjustmentKWH() {
+        return OtherTransmissionCostAdjustmentKWH;
+    }
+
+    public void setOtherTransmissionCostAdjustmentKWH(String otherTransmissionCostAdjustmentKWH) {
+        OtherTransmissionCostAdjustmentKWH = otherTransmissionCostAdjustmentKWH;
+    }
+
+    public String getOtherSystemLossCostAdjustment() {
+        return OtherSystemLossCostAdjustment;
+    }
+
+    public void setOtherSystemLossCostAdjustment(String otherSystemLossCostAdjustment) {
+        OtherSystemLossCostAdjustment = otherSystemLossCostAdjustment;
+    }
+
+    public String getOtherLifelineRateCostAdjustment() {
+        return OtherLifelineRateCostAdjustment;
+    }
+
+    public void setOtherLifelineRateCostAdjustment(String otherLifelineRateCostAdjustment) {
+        OtherLifelineRateCostAdjustment = otherLifelineRateCostAdjustment;
+    }
+
+    public String getSeniorCitizenDiscountAndSubsidyAdjustment() {
+        return SeniorCitizenDiscountAndSubsidyAdjustment;
+    }
+
+    public void setSeniorCitizenDiscountAndSubsidyAdjustment(String seniorCitizenDiscountAndSubsidyAdjustment) {
+        SeniorCitizenDiscountAndSubsidyAdjustment = seniorCitizenDiscountAndSubsidyAdjustment;
+    }
+
+    public String getFranchiseTax() {
+        return FranchiseTax;
+    }
+
+    public void setFranchiseTax(String franchiseTax) {
+        FranchiseTax = franchiseTax;
+    }
+
+    public String getBusinessTax() {
+        return BusinessTax;
+    }
+
+    public void setBusinessTax(String businessTax) {
+        BusinessTax = businessTax;
     }
 }
