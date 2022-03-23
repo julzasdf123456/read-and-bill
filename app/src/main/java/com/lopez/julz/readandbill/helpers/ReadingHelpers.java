@@ -86,20 +86,46 @@ public class ReadingHelpers {
         }
     }
 
-    public static String getLifelineRate(Bills bill, Rates rate) {
+    public static String getLifelineRate(DownloadedPreviousReadings dpr, Bills bill, Rates rate) {
         try {
-            double kwhUsed = Double.valueOf(bill.getKwhUsed()) + Double.valueOf(bill.getMultiplier());
+            double kwhUsed = Double.valueOf(bill.getKwhUsed()) * Double.valueOf(bill.getMultiplier());
 
             double deductibles = Double.valueOf(bill.getGenerationSystemCharge()) +
-                    Double.valueOf(bill.getTransmissionDeliveryChargeKWH());
+                    Double.valueOf(bill.getTransmissionDeliveryChargeKWH()) +
+                    Double.valueOf(bill.getTransmissionDeliveryChargeKW()) +
+                    Double.valueOf(bill.getSystemLossCharge()) +
+                    Double.valueOf(bill.getOtherGenerationRateAdjustment()) +
+                    Double.valueOf(bill.getOtherTransmissionCostAdjustmentKW()) +
+                    Double.valueOf(bill.getOtherTransmissionCostAdjustmentKWH()) +
+                    Double.valueOf(bill.getOtherSystemLossCostAdjustment()) +
+                    Double.valueOf(bill.getDistributionDemandCharge()) +
+                    Double.valueOf(bill.getDistributionSystemCharge()) +
+                    Double.valueOf(bill.getSupplyRetailCustomerCharge()) +
+                    Double.valueOf(bill.getSupplySystemCharge()) +
+                    Double.valueOf(bill.getMeteringSystemCharge());
 
-            if (kwhUsed <= 10) {
-                return "-" + ObjectHelpers.roundFour(deductibles * 1);
-            } else if (kwhUsed == 11) {
-                return "-" + ObjectHelpers.roundTwo(deductibles * .8);
-            } else {
+            if (dpr.getAccountType() == "RESIDENTIAL") {
                 return ObjectHelpers.roundFourNoComma(kwhUsed * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getLifelineRate())));
+            } else {
+                if (kwhUsed < 15) {
+                    return "-" + ObjectHelpers.roundFour(deductibles * .5);
+                } else if (kwhUsed >= 16 && kwhUsed < 17) {
+                    return "-" + ObjectHelpers.roundTwo(deductibles * .4);
+                } else if (kwhUsed >= 17 && kwhUsed < 18) {
+                    return "-" + ObjectHelpers.roundTwo(deductibles * .3);
+                } else if (kwhUsed >= 18 && kwhUsed < 19) {
+                    return "-" + ObjectHelpers.roundTwo(deductibles * .2);
+                } else if (kwhUsed >= 19 && kwhUsed < 20) {
+                    return "-" + ObjectHelpers.roundTwo(deductibles * .15);
+                } else if (kwhUsed >= 20 && kwhUsed < 21) {
+                    return "-" + ObjectHelpers.roundTwo(deductibles * .1);
+                } else if (kwhUsed >= 21 && kwhUsed < 25) {
+                    return "-" + ObjectHelpers.roundTwo(deductibles * .05);
+                } else {
+                    return ObjectHelpers.roundFourNoComma(kwhUsed * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getLifelineRate())));
+                }
             }
+
         } catch (Exception e) {
             Log.e("ERR_GET_LFLNE_RTE", e.getMessage());
             return "0";
@@ -108,13 +134,25 @@ public class ReadingHelpers {
 
     public static String getSeniorCitizenDiscount(DownloadedPreviousReadings dpr, Bills bill, Rates rate) {
         try {
-            double kwhUsed = Double.valueOf(bill.getKwhUsed()) + Double.valueOf(bill.getMultiplier());
+            double kwhUsed = Double.valueOf(bill.getKwhUsed()) * Double.valueOf(bill.getMultiplier());
 
             double deductibles = Double.valueOf(bill.getGenerationSystemCharge()) +
-                    Double.valueOf(bill.getTransmissionDeliveryChargeKWH());
+                    Double.valueOf(bill.getTransmissionDeliveryChargeKWH()) +
+                    Double.valueOf(bill.getTransmissionDeliveryChargeKW()) +
+                    Double.valueOf(bill.getSystemLossCharge()) +
+                    Double.valueOf(bill.getOtherGenerationRateAdjustment()) +
+                    Double.valueOf(bill.getOtherTransmissionCostAdjustmentKW()) +
+                    Double.valueOf(bill.getOtherTransmissionCostAdjustmentKWH()) +
+                    Double.valueOf(bill.getOtherSystemLossCostAdjustment()) +
+                    Double.valueOf(bill.getDistributionDemandCharge()) +
+                    Double.valueOf(bill.getDistributionSystemCharge()) +
+                    Double.valueOf(bill.getSupplyRetailCustomerCharge()) +
+                    Double.valueOf(bill.getSupplySystemCharge()) +
+                    Double.valueOf(bill.getMeteringSystemCharge()) +
+                    Double.valueOf(bill.getMeteringRetailCustomerCharge());
 
-            if (dpr.getSeniorCitizen() != null && dpr.getSeniorCitizen().equals("Yes")) {
-                return "-" + deductibles;
+            if (dpr.getSeniorCitizen() != null && dpr.getSeniorCitizen().equals("Yes") && kwhUsed <= 100) {
+                return "-" + (deductibles * .05);
             } else {
                 return ObjectHelpers.roundFourNoComma(kwhUsed * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSeniorCitizenSubsidy())));
             }
@@ -172,6 +210,22 @@ public class ReadingHelpers {
         }
     }
 
+    public static String getDistributionVat(Bills bills) {
+        try {
+            double vatables = Double.valueOf(bills.getDistributionSystemCharge()) +
+                    Double.valueOf(bills.getSupplySystemCharge()) +
+                    Double.valueOf(bills.getMeteringRetailCustomerCharge()) +
+                    Double.valueOf(bills.getMeteringSystemCharge()) +
+                    Double.valueOf(bills.getLifelineRate()) +
+                    Double.valueOf(bills.getOtherLifelineRateCostAdjustment());
+
+            return ObjectHelpers.roundFourNoComma(vatables * .12);
+        } catch (Exception e) {
+            Log.e("ERR_GET_DST_VAT", e.getMessage());
+            return "0";
+        }
+    }
+
     public static Bills generateRegularBill(Bills bill, DownloadedPreviousReadings dpr, Rates rate, Double kwhUsed, Double presReading, String userId) {
         try {
             if (rate != null) {
@@ -211,7 +265,7 @@ public class ReadingHelpers {
                     bill.setDistributionSystemCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getDistributionSystemCharge()))));
                     bill.setSupplyRetailCustomerCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSupplyRetailCustomerCharge()))));
                     bill.setSupplySystemCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSupplySystemCharge()))));
-                    bill.setMeteringRetailCustomerCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getMeteringRetailCustomerCharge()))));
+                    bill.setMeteringRetailCustomerCharge(ObjectHelpers.roundFourNoComma(Double.valueOf(ObjectHelpers.doubleStringNull(rate.getMeteringRetailCustomerCharge()))));
                     bill.setMeteringSystemCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getMeteringSystemCharge()))));
                     bill.setRFSC(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getRFSC()))));
                     bill.setInterClassCrossSubsidyCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getInterClassCrossSubsidyCharge()))));
@@ -225,20 +279,28 @@ public class ReadingHelpers {
                     bill.setGenerationVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getGenerationVAT()))));
                     bill.setTransmissionVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getTransmissionVAT()))));
                     bill.setSystemLossVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSystemLossVAT()))));
-                    bill.setDistributionVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getDistributionVAT()))));
                     bill.setRealPropertyTax(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getRealPropertyTax()))));
 
                     bill.setOtherGenerationRateAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherGenerationRateAdjustment()))));
                     bill.setOtherTransmissionCostAdjustmentKW(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherTransmissionCostAdjustmentKW()))));
                     bill.setOtherTransmissionCostAdjustmentKWH(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherTransmissionCostAdjustmentKWH()))));
                     bill.setOtherSystemLossCostAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherSystemLossCostAdjustment()))));
-                    bill.setOtherLifelineRateCostAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherLifelineRateCostAdjustment()))));
-                    bill.setSeniorCitizenDiscountAndSubsidyAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSeniorCitizenDiscountAndSubsidyAdjustment()))));
+
+                    if (dpr.getSeniorCitizen()  != null && dpr.getSeniorCitizen().equals("Yes") && kwhUsedFinal <= 100) {
+                        bill.setOtherLifelineRateCostAdjustment("0");
+                        bill.setSeniorCitizenDiscountAndSubsidyAdjustment("0");
+                    } else {
+                        bill.setOtherLifelineRateCostAdjustment("0");
+                        bill.setSeniorCitizenDiscountAndSubsidyAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSeniorCitizenDiscountAndSubsidyAdjustment()))));
+                    }
+
                     bill.setFranchiseTax(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getFranchiseTax()))));
                     bill.setBusinessTax(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getBusinessTax()))));
 
                     bill.setSeniorCitizenSubsidy(getSeniorCitizenDiscount(dpr, bill, rate));
-                    bill.setLifelineRate(getLifelineRate(bill, rate));
+                    bill.setLifelineRate(getLifelineRate(dpr, bill, rate));
+
+                    bill.setDistributionVAT(getDistributionVat(bill));
 
                     bill.setNetAmount(getNetAmount(bill));
 
@@ -279,7 +341,7 @@ public class ReadingHelpers {
                     bill.setDistributionSystemCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getDistributionSystemCharge()))));
                     bill.setSupplyRetailCustomerCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSupplyRetailCustomerCharge()))));
                     bill.setSupplySystemCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSupplySystemCharge()))));
-                    bill.setMeteringRetailCustomerCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getMeteringRetailCustomerCharge()))));
+                    bill.setMeteringRetailCustomerCharge(ObjectHelpers.roundFourNoComma(Double.valueOf(ObjectHelpers.doubleStringNull(rate.getMeteringRetailCustomerCharge()))));
                     bill.setMeteringSystemCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getMeteringSystemCharge()))));
                     bill.setRFSC(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getRFSC()))));
                     bill.setInterClassCrossSubsidyCharge(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getInterClassCrossSubsidyCharge()))));
@@ -293,20 +355,28 @@ public class ReadingHelpers {
                     bill.setGenerationVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getGenerationVAT()))));
                     bill.setTransmissionVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getTransmissionVAT()))));
                     bill.setSystemLossVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSystemLossVAT()))));
-                    bill.setDistributionVAT(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getDistributionVAT()))));
                     bill.setRealPropertyTax(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getRealPropertyTax()))));
 
                     bill.setOtherGenerationRateAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherGenerationRateAdjustment()))));
                     bill.setOtherTransmissionCostAdjustmentKW(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherTransmissionCostAdjustmentKW()))));
                     bill.setOtherTransmissionCostAdjustmentKWH(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherTransmissionCostAdjustmentKWH()))));
                     bill.setOtherSystemLossCostAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherSystemLossCostAdjustment()))));
-                    bill.setOtherLifelineRateCostAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getOtherLifelineRateCostAdjustment()))));
-                    bill.setSeniorCitizenDiscountAndSubsidyAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSeniorCitizenDiscountAndSubsidyAdjustment()))));
+
+                    if (dpr.getSeniorCitizen()  != null && dpr.getSeniorCitizen().equals("Yes") && kwhUsedFinal <= 100) {
+                        bill.setOtherLifelineRateCostAdjustment("0");
+                        bill.setSeniorCitizenDiscountAndSubsidyAdjustment("0");
+                    } else {
+                        bill.setOtherLifelineRateCostAdjustment("0");
+                        bill.setSeniorCitizenDiscountAndSubsidyAdjustment(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getSeniorCitizenDiscountAndSubsidyAdjustment()))));
+                    }
+
                     bill.setFranchiseTax(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getFranchiseTax()))));
                     bill.setBusinessTax(ObjectHelpers.roundFourNoComma(kwhUsedFinal * Double.valueOf(ObjectHelpers.doubleStringNull(rate.getBusinessTax()))));
 
                     bill.setSeniorCitizenSubsidy(getSeniorCitizenDiscount(dpr, bill, rate));
-                    bill.setLifelineRate(getLifelineRate(bill, rate));
+                    bill.setLifelineRate(getLifelineRate(dpr, bill, rate));
+
+                    bill.setDistributionVAT(getDistributionVat(bill));
 
                     bill.setNetAmount(getNetAmount(bill));
 

@@ -207,6 +207,15 @@
                         android:drawableLeft="@drawable/ic_baseline_playlist_add_check_circle_24"
                         android:layout_marginTop="15dp"/>
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/printBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Re-Print Bill"
+                        android:drawableLeft="@drawable/ic_baseline_print_24"
+                        android:drawableTint="@color/white"
+                        android:layout_marginTop="15dp"/>
+
                     <RelativeLayout
                         android:layout_marginTop="20dp"
                         android:layout_width="match_parent"

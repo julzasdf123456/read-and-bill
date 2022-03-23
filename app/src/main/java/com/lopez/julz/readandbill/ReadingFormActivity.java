@@ -11,6 +11,8 @@ import androidx.constraintlayout.widget.Constraints;
 import androidx.core.content.FileProvider;
 import androidx.room.Room;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,6 +36,11 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.epson.epos2.Epos2CallbackCode;
+import com.epson.epos2.Epos2Exception;
+import com.epson.epos2.printer.Printer;
+import com.epson.epos2.printer.PrinterStatusInfo;
+import com.epson.epos2.printer.ReceiveListener;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.button.MaterialButton;
 import com.google.gson.JsonParser;
@@ -43,6 +50,7 @@ import com.lopez.julz.readandbill.dao.DownloadedPreviousReadings;
 import com.lopez.julz.readandbill.dao.Rates;
 import com.lopez.julz.readandbill.dao.ReadingImages;
 import com.lopez.julz.readandbill.dao.Readings;
+import com.lopez.julz.readandbill.dao.Users;
 import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 import com.lopez.julz.readandbill.helpers.ReadingHelpers;
@@ -70,6 +78,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class ReadingFormActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener {
 
@@ -89,13 +98,14 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
     public Bills currentBill;
     public Double kwhConsumed;
     public String readingId;
+    public Users user;
 
     /**
      * FORM
      */
     public EditText prevReading, presReading, notes;
     public TextView kwhUsed, accountType, rate, sequenceCode, accountStatus, coreloss, multiplier, seniorCitizen, currentArrears, totalArrears;
-    public MaterialButton billBtn, nextBtn, prevBtn, takePhotoButton;
+    public MaterialButton billBtn, nextBtn, prevBtn, takePhotoButton, printBtn;
     public RadioGroup fieldStatus;
 
     private final static int REQUEST_CODE_ASK_PERMISSIONS = 1002;
@@ -116,6 +126,13 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
     static final int REQUEST_PICTURE_CAPTURE = 1;
     public FlexboxLayout imageFields;
     public String currentPhotoPath;
+
+    /**
+     * BT
+     */
+    BluetoothAdapter mBluetoothAdapter;
+    BluetoothDevice mmDevice;
+    Printer printer = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +174,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         seniorCitizen = findViewById(R.id.seniorCitizen);
         currentArrears = findViewById(R.id.currentArrears);
         totalArrears = findViewById(R.id.totalArrears);
+        printBtn = findViewById(R.id.printBtn);
+
+        printBtn.setVisibility(View.GONE);
 
         fieldStatus.setVisibility(View.GONE);
         takePhotoButton.setVisibility(View.GONE);
@@ -350,6 +370,13 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             }
         });
 
+        printBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                print(currentBill, currentRate, currentDpr);
+            }
+        });
+
         new FetchInitID().execute(id);
     }
 
@@ -520,6 +547,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 currentRate = db.ratesDao().getOne(currentDpr.getAccountType(), currentDpr.getAreaCode());
                 currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                 currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
+                user = db.usersDao().getOneById(userId);
             } catch (Exception e) {
                 Log.e("ERR_FETCH_NIT", e.getMessage());
             }
@@ -574,6 +602,15 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 notes.setText("");
                 kwhUsed.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
                 revealPhotoButton(false);
+            }
+
+            /**
+             * IF HAS BILL
+             */
+            if (currentBill != null) {
+                printBtn.setVisibility(View.VISIBLE);
+            } else {
+                printBtn.setVisibility(View.GONE);
             }
 
             new GetPhotos().execute();
@@ -683,6 +720,15 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 revealPhotoButton(false);
             }
 
+            /**
+             * IF HAS BILL
+             */
+            if (currentBill != null) {
+                printBtn.setVisibility(View.VISIBLE);
+            } else {
+                printBtn.setVisibility(View.GONE);
+            }
+
             new GetPhotos().execute();
         }
     }
@@ -779,7 +825,6 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                             db.readingsDao().insertAll(reading);
                         }
 
-
                         /** UPDATE STATUS OF DOWNLOADED READING **/
                         currentDpr.setStatus("READ");
                         db.downloadedPreviousReadingsDao().updateAll(currentDpr);
@@ -789,146 +834,10 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                         } else {
                             if (currentBill != null) {
-//                                currentBill.setAccountNumber(currentDpr.getId());
-//                                currentBill.setServicePeriod(servicePeriod);
-//                                currentBill.setMultiplier(currentDpr.getMultiplier());
-//                                currentBill.setCoreloss(currentDpr.getCoreloss()!=null ? currentDpr.getCoreloss() : "0");
-//                                currentBill.setKwhUsed(kwhConsumed + "");
-//                                currentBill.setPreviousKwh(currentDpr.getKwhUsed());
-//                                currentBill.setPresentKwh(reading.getKwhUsed());
-//                                currentBill.setKwhAmount((Double.valueOf(currentRate.getTotalRateVATIncluded()) * kwhConsumed) + "");
-//                                currentBill.setEffectiveRate(currentRate.getTotalRateVATIncluded());
-//                                currentBill.setAdditionalCharges(null); // TO BE ADDED
-//
-//                                // GENERATE NET AMOUNT
-//                                double multiplier = currentDpr.getMultiplier() != null ? Double.valueOf(currentDpr.getMultiplier()) : 1;
-//                                double coreloss = currentDpr.getCoreloss() != null ? Double.valueOf(currentDpr.getCoreloss()) : 0;
-//                                double netAmount = ((kwhConsumed * multiplier) + coreloss) * Double.valueOf(currentRate.getTotalRateVATIncluded());
-//                                double seniorCitizen = netAmount * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSeniorCitizenSubsidy()));
-//                                double arrears = currentDpr.getArrearsLedger() != null ? Double.valueOf(currentDpr.getArrearsLedger()) : 0;
-//                                double addOns = arrears;
-//                                double deductions = seniorCitizen;
-//                                if (currentDpr.getSeniorCitizen() != null && currentDpr.getSeniorCitizen().equals("Yes") && kwhConsumed < 101) {
-//                                    currentBill.setSeniorCitizenSubsidy(ObjectHelpers.roundFourNoComma(seniorCitizen));
-//                                    currentBill.setDeductions(ObjectHelpers.roundFourNoComma(deductions)); // TO BE ADDED
-//                                    netAmount = netAmount - Double.valueOf(ObjectHelpers.doubleStringNull(currentBill.getDeductions()));
-//                                }
-//                                netAmount = netAmount + addOns;
-//                                currentBill.setAdditionalCharges(ObjectHelpers.roundFourNoComma(addOns));
-//                                currentBill.setNetAmount(ObjectHelpers.roundFourNoComma(netAmount));
-//                                currentBill.setBillingDate(ObjectHelpers.getCurrentDate());
-//                                currentBill.setServiceDateFrom(ReadingHelpers.getServiceFromToday());
-//                                currentBill.setServiceDateTo(ReadingHelpers.getServiceTo());
-//                                currentBill.setDueDate(ReadingHelpers.getDueDate(servicePeriod));
-//                                currentBill.setMeterNumber(""); // TO BE ADDED
-//                                currentBill.setConsumerType(currentDpr.getAccountType());
-//                                currentBill.setBillType(currentBill.getConsumerType());
-//
-//                                // COMPUTE RATES
-//                                currentBill.setGenerationSystemCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getGenerationSystemCharge()))));
-//                                currentBill.setTransmissionDeliveryChargeKW(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getTransmissionDeliveryChargeKW()))));
-//                                currentBill.setTransmissionDeliveryChargeKWH(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getTransmissionDeliveryChargeKWH()))));
-//                                currentBill.setSystemLossCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSystemLossCharge()))));
-//                                currentBill.setDistributionDemandCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getDistributionDemandCharge()))));
-//                                currentBill.setDistributionSystemCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getDistributionSystemCharge()))));
-//                                currentBill.setSupplyRetailCustomerCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSupplyRetailCustomerCharge()))));
-//                                currentBill.setSupplySystemCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSupplySystemCharge()))));
-//                                currentBill.setMeteringRetailCustomerCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMeteringRetailCustomerCharge()))));
-//                                currentBill.setMeteringSystemCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMeteringSystemCharge()))));
-//                                currentBill.setRFSC(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getRFSC()))));
-//                                currentBill.setLifelineRate(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getLifelineRate()))));
-//                                currentBill.setInterClassCrossSubsidyCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getInterClassCrossSubsidyCharge()))));
-//                                currentBill.setPPARefund(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getPPARefund()))));
-//                                currentBill.setSeniorCitizenSubsidy(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSeniorCitizenSubsidy()))));
-//                                currentBill.setMissionaryElectrificationCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMissionaryElectrificationCharge()))));
-//                                currentBill.setEnvironmentalCharge(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getEnvironmentalCharge()))));
-//                                currentBill.setStrandedContractCosts(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getStrandedContractCosts()))));
-//                                currentBill.setNPCStrandedDebt(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getNPCStrandedDebt()))));
-//                                currentBill.setFeedInTariffAllowance(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getFeedInTariffAllowance()))));
-//                                currentBill.setMissionaryElectrificationREDCI(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMissionaryElectrificationREDCI()))));
-//                                currentBill.setGenerationVAT(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getGenerationVAT()))));
-//                                currentBill.setTransmissionVAT(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getTransmissionVAT()))));
-//                                currentBill.setSystemLossVAT(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSystemLossVAT()))));
-//                                currentBill.setDistributionVAT(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getDistributionVAT()))));
-//                                currentBill.setRealPropertyTax(ObjectHelpers.roundFour(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getRealPropertyTax()))));
-//
-//                                currentBill.setUserId(userId);
-//                                currentBill.setBilledFrom("APP");
-//                                currentBill.setUploadStatus("UPLOADABLE");
                                 currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
 
                                 db.billsDao().updateAll(currentBill);
                             } else {
-                                // CREATE NEW BILL
-//                                currentBill = new Bills();
-//                                currentBill.setId(ObjectHelpers.getTimeInMillis() + "-" + ObjectHelpers.generateRandomString());
-//                                currentBill.setBillNumber(ReadingHelpers.generateBillNumber(currentDpr.getAreaCode()));
-//                                currentBill.setAccountNumber(currentDpr.getId());
-//                                currentBill.setServicePeriod(servicePeriod);
-//                                currentBill.setMultiplier(currentDpr.getMultiplier());
-//                                currentBill.setCoreloss(currentDpr.getCoreloss()!=null ? currentDpr.getCoreloss() : "0");
-//                                currentBill.setKwhUsed(kwhConsumed + "");
-//                                currentBill.setPreviousKwh(currentDpr.getKwhUsed());
-//                                currentBill.setPresentKwh(reading.getKwhUsed());
-//                                currentBill.setKwhAmount((Double.valueOf(currentRate.getTotalRateVATIncluded()) * kwhConsumed) + "");
-//                                currentBill.setEffectiveRate(currentRate.getTotalRateVATIncluded());
-//                                currentBill.setAdditionalCharges(null); // TO BE ADDED
-//
-//                                // GENERATE NET AMOUNT
-//                                double multiplier = currentDpr.getMultiplier() != null ? Double.valueOf(currentDpr.getMultiplier()) : 1;
-//                                double coreloss = currentDpr.getCoreloss() != null ? Double.valueOf(currentDpr.getCoreloss()) : 0;
-//                                double netAmount = ((kwhConsumed * multiplier) + coreloss) * Double.valueOf(currentRate.getTotalRateVATIncluded());
-//                                double seniorCitizen = netAmount * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSeniorCitizenSubsidy()));
-//                                double arrears = currentDpr.getArrearsLedger() != null ? Double.valueOf(currentDpr.getArrearsLedger()) : 0;
-//                                double addOns = arrears;
-//                                double deductions = seniorCitizen;
-//                                if (currentDpr.getSeniorCitizen() != null && currentDpr.getSeniorCitizen().equals("Yes") && kwhConsumed < 101) {
-//                                    currentBill.setSeniorCitizenSubsidy(ObjectHelpers.roundFourNoComma(seniorCitizen));
-//                                    currentBill.setDeductions(ObjectHelpers.roundFourNoComma(deductions));
-//                                    netAmount = netAmount - Double.valueOf(ObjectHelpers.doubleStringNull(currentBill.getDeductions()));
-//                                }
-//                                netAmount = netAmount + addOns;
-//                                currentBill.setAdditionalCharges(ObjectHelpers.roundFourNoComma(addOns));
-//                                currentBill.setNetAmount(ObjectHelpers.roundFourNoComma(netAmount));
-//                                currentBill.setBillingDate(ObjectHelpers.getCurrentDate());
-//                                currentBill.setServiceDateFrom(ReadingHelpers.getServiceFromToday()); // CHANGE BASED ON PREVIOUS MONTH
-//                                currentBill.setServiceDateTo(ReadingHelpers.getServiceTo());
-//                                currentBill.setDueDate(ReadingHelpers.getDueDate(servicePeriod));
-//                                currentBill.setMeterNumber(""); // TO BE ADDED
-//                                currentBill.setConsumerType(currentDpr.getAccountType());
-//                                currentBill.setBillType(currentBill.getConsumerType());
-//
-//                                // COMPUTE RATES
-//                                currentBill.setGenerationSystemCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getGenerationSystemCharge()))));
-//                                currentBill.setTransmissionDeliveryChargeKW(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getTransmissionDeliveryChargeKW()))));
-//                                currentBill.setTransmissionDeliveryChargeKWH(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getTransmissionDeliveryChargeKWH()))));
-//                                currentBill.setSystemLossCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSystemLossCharge()))));
-//                                currentBill.setDistributionDemandCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getDistributionDemandCharge()))));
-//                                currentBill.setDistributionSystemCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getDistributionSystemCharge()))));
-//                                currentBill.setSupplyRetailCustomerCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSupplyRetailCustomerCharge()))));
-//                                currentBill.setSupplySystemCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSupplySystemCharge()))));
-//                                currentBill.setMeteringRetailCustomerCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMeteringRetailCustomerCharge()))));
-//                                currentBill.setMeteringSystemCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMeteringSystemCharge()))));
-//                                currentBill.setRFSC(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getRFSC()))));
-//                                currentBill.setLifelineRate(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getLifelineRate()))));
-//                                currentBill.setInterClassCrossSubsidyCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getInterClassCrossSubsidyCharge()))));
-//                                currentBill.setPPARefund(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getPPARefund()))));
-//                                currentBill.setSeniorCitizenSubsidy(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSeniorCitizenSubsidy()))));
-//                                currentBill.setMissionaryElectrificationCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMissionaryElectrificationCharge()))));
-//                                currentBill.setEnvironmentalCharge(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getEnvironmentalCharge()))));
-//                                currentBill.setStrandedContractCosts(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getStrandedContractCosts()))));
-//                                currentBill.setNPCStrandedDebt(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getNPCStrandedDebt()))));
-//                                currentBill.setFeedInTariffAllowance(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getFeedInTariffAllowance()))));
-//                                currentBill.setMissionaryElectrificationREDCI(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getMissionaryElectrificationREDCI()))));
-//                                currentBill.setGenerationVAT(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getGenerationVAT()))));
-//                                currentBill.setTransmissionVAT(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getTransmissionVAT()))));
-//                                currentBill.setSystemLossVAT(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getSystemLossVAT()))));
-//                                currentBill.setDistributionVAT(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getDistributionVAT()))));
-//                                currentBill.setRealPropertyTax(ObjectHelpers.roundFourNoComma(kwhConsumed * Double.valueOf(ObjectHelpers.doubleStringNull(currentRate.getRealPropertyTax()))));
-//
-//                                currentBill.setUserId(userId);
-//                                currentBill.setBilledFrom("APP");
-//                                currentBill.setUploadStatus("UPLOADABLE");
                                 currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
 
                                 db.billsDao().insertAll(currentBill);
@@ -953,6 +862,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 /**
                  * PRINT BILL
                  */
+                print(currentBill, currentRate, currentDpr);
 
                 /**
                  * PROCEED TO NEXT
@@ -1174,6 +1084,354 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         } else {
             takePhotoButton.setVisibility(View.GONE);
             billBtn.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * BT PRINTING
+     */
+    // This will find a bluetooth printer device
+    public void findBTDevice() {
+        try {
+            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            if (mBluetoothAdapter == null) {
+                Toast.makeText(this, "No bluetooth adapter available", Toast.LENGTH_SHORT).show();
+            } else {
+                if (!mBluetoothAdapter.isEnabled()) {
+                    Intent enableBluetooth = new Intent(
+                            BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBluetooth, 0);
+                    Toast.makeText(this, "Bluetooth is disabled!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Set<BluetoothDevice> pairedDevices = mBluetoothAdapter
+                            .getBondedDevices();
+                    if (pairedDevices.size() > 0) {
+                        for (BluetoothDevice device : pairedDevices) {
+                            if (device.getName().contains("TM-")) {
+                                mmDevice = device;
+                                Log.e("PRINTER_LOCATED", "Printer Found");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            Toast.makeText(this, "No bluetooth adapter available", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "No bluetooth adapter available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void print(Bills bills, Rates rates, DownloadedPreviousReadings dpr) {
+        try {
+            findBTDevice();
+            if (mmDevice != null) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            printer = new Printer(Printer.TM_P80, Printer.MODEL_ANK, ReadingFormActivity.this);
+
+                            printer.addFeedLine(1);
+
+                            // HEADER
+                            printer.addTextAlign(Printer.ALIGN_CENTER);
+                            StringBuilder headerBuilder = new StringBuilder();
+                            headerBuilder.append(getResources().getString(R.string.company));
+                            headerBuilder.append("\n");
+                            headerBuilder.append(getResources().getString(R.string.companyAddress));
+                            headerBuilder.append("\n");
+                            headerBuilder.append(getResources().getString(R.string.companyTin));
+                            headerBuilder.append("\n");
+                            headerBuilder.append("STATEMENT OF ACCOUNT");
+                            headerBuilder.append("\n");
+                            headerBuilder.append(ObjectHelpers.formatShortDateWithDate(bills.getBillingDate()));
+                            headerBuilder.append("\n");
+                            headerBuilder.append("\n");
+
+                            printer.addText(headerBuilder.toString());
+                            printer.addBarcode(bills.getAccountNumber(), Printer.BARCODE_CODE93, Printer.HRI_NONE, Printer.PARAM_UNSPECIFIED, Printer.PARAM_UNSPECIFIED, 80);
+
+                            StringBuilder nameBuilder = new StringBuilder();
+                            printer.addTextAlign(Printer.ALIGN_LEFT);
+                            printer.addTextSize(1,2);
+                            nameBuilder.append("\n");
+                            nameBuilder.append("Acct. No.: " + bills.getAccountNumber());
+                            nameBuilder.append("\n");
+                            nameBuilder.append(dpr.getServiceAccountName());
+                            nameBuilder.append("\n");
+                            printer.addText(nameBuilder.toString());
+
+                            StringBuilder subheaderBuilder = new StringBuilder();
+                            printer.addTextSize(1,1);
+                            subheaderBuilder.append(dpr.getPurok() + ", " + dpr.getBarangayFull() + ", " + dpr.getTownFull());
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Billing Month: " + ObjectHelpers.formatShortDate(bills.getServicePeriod()) + "    Mult: " + bills.getMultiplier());
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Meter No:" + (dpr.getMeterSerial() != null ? dpr.getMeterSerial() : '-') + "    Type: " + dpr.getAccountType());
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Prev. Reading: " + ObjectHelpers.formatShortDateWithDate(dpr.getReadingTimestamp()) + "    KWH: " + dpr.getKwhUsed());
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Pres. Reading: " + ObjectHelpers.formatShortDateWithDate(bills.getBillingDate()) + "    KWH: " + bills.getPresentKwh());
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("KwH Used: " + bills.getKwhUsed() + " \tRate: " + ObjectHelpers.roundFour(Double.valueOf(bills.getEffectiveRate())));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Due Date: " + ObjectHelpers.formatShortDateWithDate(bills.getDueDate()));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Meter Reader: " + (user != null ? user.getUsername() : '-'));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Arrears: P " + (dpr.getArrearsTotal() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsTotal())) : "0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Termed Payments: P " + (dpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsLedger())) : "0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Unpaid Balance: P " + (dpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getBalance())) : "0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("\n");
+
+                            // RATES
+                            subheaderBuilder.append("PARTICULARS \t\tRATE \t  AMOUNT");
+                            subheaderBuilder.append("\n");
+
+                            // GENERATION AND TRANSMISSION
+                            subheaderBuilder.append("GEN & TRANS REVENUES");
+                            subheaderBuilder.append("\n");
+
+                            subheaderBuilder.append("Generation Sys. \t" + (rates.getGenerationSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getGenerationSystemCharge())) : "0.0000")
+                                    + "\t  " + (bills.getGenerationSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getGenerationSystemCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Trans. Demand \t\t" + (rates.getTransmissionDeliveryChargeKW() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionDeliveryChargeKW())) : "0.0000")
+                                    + "\t  " + (bills.getTransmissionDeliveryChargeKW() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionDeliveryChargeKW())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Trans. System \t\t" + (rates.getTransmissionDeliveryChargeKWH() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionDeliveryChargeKWH())) : "0.0000")
+                                    + "\t  " + (bills.getTransmissionDeliveryChargeKWH() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionDeliveryChargeKWH())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("System Loss \t\t" + (rates.getSystemLossCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSystemLossCharge())) : "0.0000")
+                                    + "\t  " + (bills.getSystemLossCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSystemLossCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("OGA \t\t\t" + (rates.getOtherGenerationRateAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherGenerationRateAdjustment())) : "0.0000")
+                                    + "\t  " + (bills.getOtherGenerationRateAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherGenerationRateAdjustment())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("OTCA Demand \t\t" + (rates.getOtherTransmissionCostAdjustmentKW() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherTransmissionCostAdjustmentKW())) : "0.0000")
+                                    + "\t  " + (bills.getOtherTransmissionCostAdjustmentKW() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherTransmissionCostAdjustmentKW())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("OTCA System \t\t" + (rates.getOtherTransmissionCostAdjustmentKWH() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherTransmissionCostAdjustmentKWH())) : "0.0000")
+                                    + "\t  " + (bills.getOtherTransmissionCostAdjustmentKWH() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherTransmissionCostAdjustmentKWH())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("OSLA \t\t\t" + (rates.getOtherSystemLossCostAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherSystemLossCostAdjustment())) : "0.0000")
+                                    + "\t  " + (bills.getOtherSystemLossCostAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherSystemLossCostAdjustment())) : "0.0"));
+                            subheaderBuilder.append("\n");
+
+                            // DSM
+                            subheaderBuilder.append("DISTRIBUTION REVENUES");
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Dist. Demand \t\t" + (rates.getDistributionDemandCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionDemandCharge())) : "0.0000")
+                                    + "\t  " + (bills.getDistributionDemandCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionDemandCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Dist. System \t\t" + (rates.getDistributionSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionSystemCharge())) : "0.0000")
+                                    + "\t  " + (bills.getDistributionSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionSystemCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Sup. Retail Cust. \t" + (rates.getSupplyRetailCustomerCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSupplyRetailCustomerCharge())) : "0.0000")
+                                    + "\t  " + (bills.getSupplyRetailCustomerCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSupplyRetailCustomerCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Supply System \t\t" + (rates.getSupplySystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSupplySystemCharge())) : "0.0000")
+                                    + "\t  " + (bills.getSupplySystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSupplySystemCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Metering Retail \t" + (rates.getMeteringRetailCustomerCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMeteringRetailCustomerCharge())) : "0.0000")
+                                    + "\t  " + (bills.getMeteringRetailCustomerCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMeteringRetailCustomerCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Metering System \t" + (rates.getMeteringSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMeteringSystemCharge())) : "0.0000")
+                                    + "\t  " + (bills.getMeteringSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMeteringSystemCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("RFSC \t\t\t" + (rates.getRFSC() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getRFSC())) : "0.0")
+                                    + "\t  " + (bills.getRFSC() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getRFSC())) : "0.0"));
+                            subheaderBuilder.append("\n");
+
+                            // UNIVERSAL CHARGES
+                            subheaderBuilder.append("UNIVERSAL CHARGES");
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Missionary Elec. \t" + (rates.getMissionaryElectrificationCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMissionaryElectrificationCharge())) : "0.0000")
+                                    + "\t  " + (bills.getMissionaryElectrificationCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMissionaryElectrificationCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Environmental Chrg. \t" + (rates.getEnvironmentalCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getEnvironmentalCharge())) : "0.0000")
+                                    + "\t  " + (bills.getEnvironmentalCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getEnvironmentalCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Stranded Cont. \t\t" + (rates.getStrandedContractCosts() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getStrandedContractCosts())) : "0.0000")
+                                    + "\t  " + (bills.getStrandedContractCosts() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getStrandedContractCosts())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("NPC Stranded Debt \t" + (rates.getNPCStrandedDebt() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getNPCStrandedDebt())) : "0.0000")
+                                    + "\t  " + (bills.getNPCStrandedDebt() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getNPCStrandedDebt())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("FIT All. \t\t" + (rates.getFeedInTariffAllowance() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getFeedInTariffAllowance())) : "0.0000")
+                                    + "\t  " + (bills.getFeedInTariffAllowance() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getFeedInTariffAllowance())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("REDCI \t\t\t" + (rates.getMissionaryElectrificationREDCI() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMissionaryElectrificationREDCI())) : "0.0000")
+                                    + "\t  " + (bills.getMissionaryElectrificationREDCI() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMissionaryElectrificationREDCI())) : "0.0"));
+                            subheaderBuilder.append("\n");
+
+                            // OTHERS
+                            subheaderBuilder.append("OTHERS");
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Lifeline Rate\t\t" + (rates.getLifelineRate() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getLifelineRate())) : "0.0000")
+                                    + "\t  " + (bills.getLifelineRate() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getLifelineRate())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("ICC Subsidy\t\t" + (rates.getInterClassCrossSubsidyCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getInterClassCrossSubsidyCharge())) : "0.0000")
+                                    + "\t  " + (bills.getInterClassCrossSubsidyCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getInterClassCrossSubsidyCharge())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("PPA Refund\t\t" + (rates.getPPARefund() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getPPARefund())) : "0.0000")
+                                    + "\t  " + (bills.getPPARefund() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getPPARefund())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Sen. Citizen Sub. \t" + (rates.getSeniorCitizenSubsidy() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSeniorCitizenSubsidy())) : "0.0000")
+                                    + "\t  " + (bills.getSeniorCitizenSubsidy() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSeniorCitizenSubsidy())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("OLRA \t\t\t" + (rates.getOtherLifelineRateCostAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherLifelineRateCostAdjustment())) : "0.0000")
+                                    + "\t  " + (bills.getOtherLifelineRateCostAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherLifelineRateCostAdjustment())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("SC Disc. & Ajd. \t" + (rates.getSeniorCitizenDiscountAndSubsidyAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSeniorCitizenDiscountAndSubsidyAdjustment())) : "0.0000")
+                                    + "\t  " + (bills.getSeniorCitizenDiscountAndSubsidyAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSeniorCitizenDiscountAndSubsidyAdjustment())) : "0.0"));
+                            subheaderBuilder.append("\n");
+
+                            // OTHERS
+                            subheaderBuilder.append("TAXES");
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Generation VAT \t\t" + (rates.getGenerationVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getGenerationVAT())) : "0.0000")
+                                    + "\t  " + (bills.getGenerationVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getGenerationVAT())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Transmission VAT \t" + (rates.getTransmissionVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionVAT())) : "0.0000")
+                                    + "\t  " + (bills.getTransmissionVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionVAT())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Distribution VAT \t" + (rates.getDistributionVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionVAT())) : "0.0000")
+                                    + "\t  " + (bills.getDistributionVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionVAT())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("System Loss VAT \t" + (rates.getSystemLossVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSystemLossVAT())) : "0.0000")
+                                    + "\t  " + (bills.getSystemLossVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSystemLossVAT())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Franchise Tax\t\t" + (rates.getFranchiseTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getFranchiseTax())) : "0.0000")
+                                    + "\t  " + (bills.getFranchiseTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getFranchiseTax())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Business Tax\t\t" + (rates.getBusinessTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getBusinessTax())) : "0.0000")
+                                    + "\t  " + (bills.getBusinessTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getBusinessTax())) : "0.0"));
+                            subheaderBuilder.append("\n");
+                            subheaderBuilder.append("Real Property Tax\t" + (rates.getRealPropertyTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getRealPropertyTax())) : "0.0000")
+                                    + "\t  " + (bills.getRealPropertyTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getRealPropertyTax())) : "0.0"));
+                            subheaderBuilder.append("\n");
+
+                            printer.addText(subheaderBuilder.toString());
+
+                            // NET AMOUNT
+                            printer.addTextAlign(Printer.ALIGN_CENTER);
+                            StringBuilder amountDueLbl = new StringBuilder();
+                            amountDueLbl.append("--------------------------------------");
+                            amountDueLbl.append("\n");
+                            amountDueLbl.append("Amount Due:");
+                            amountDueLbl.append("\n");
+                            printer.addText(amountDueLbl.toString());
+
+                            StringBuilder amountDue = new StringBuilder();
+                            printer.addTextSize(2, 3);
+                            amountDue.append("P " + ObjectHelpers.roundTwo(Double.valueOf(bills.getNetAmount())));
+                            amountDue.append("\n");
+                            printer.addText(amountDue.toString());
+
+                            // NOTES
+                            printer.addTextAlign(Printer.ALIGN_LEFT);
+                            StringBuilder notes = new StringBuilder();
+                            printer.addTextSize(1, 1);
+                            notes.append("NOTE: \tPlease pay this bill within nine (9) days upon receipt hereof to avoid disconnection of your electric services.");
+                            notes.append("\n");
+                            notes.append("Rates are net of refund per ERC order 2012-018CF");
+                            notes.append("\n");
+                            printer.addText(notes.toString());
+
+                            // ADDITIONAL
+                            printer.addTextAlign(Printer.ALIGN_CENTER);
+                            StringBuilder additional = new StringBuilder();
+                            additional.append("*PLS PRESENT THIS STATEMENT UPON PAYMENT*");
+                            additional.append("\n");
+                            printer.addText(additional.toString());
+
+                            // STUB
+                            StringBuilder stubLine = new StringBuilder();
+                            stubLine.append("------------------------------------------");
+                            stubLine.append("\n");
+                            printer.addText(stubLine.toString());
+
+                            printer.addTextAlign(Printer.ALIGN_LEFT);
+                            StringBuilder dateBldr = new StringBuilder();
+                            dateBldr.append("Date: " + ObjectHelpers.getCurrentDate() + " " + ObjectHelpers.getCurrentTime());
+                            dateBldr.append("\n");
+                            dateBldr.append("\n");
+                            printer.addText(dateBldr.toString());
+
+                            StringBuilder nameBuilderStub = new StringBuilder();
+                            printer.addTextAlign(Printer.ALIGN_LEFT);
+                            printer.addTextSize(1,2);
+                            nameBuilderStub.append("\n");
+                            nameBuilderStub.append("Acct. No.: " + bills.getAccountNumber());
+                            nameBuilderStub.append("\n");
+                            nameBuilderStub.append(dpr.getServiceAccountName());
+                            nameBuilderStub.append("\n");
+                            printer.addText(nameBuilderStub.toString());
+
+                            StringBuilder subheaderBuilderStub = new StringBuilder();
+                            printer.addTextSize(1,1);
+                            subheaderBuilderStub.append(dpr.getPurok() + ", " + dpr.getBarangayFull() + ", " + dpr.getTownFull());
+                            subheaderBuilderStub.append("\n");
+                            subheaderBuilderStub.append("\n");
+                            subheaderBuilderStub.append("Billing Month: " + ObjectHelpers.formatShortDate(bills.getServicePeriod()) + "\tMult.: " + dpr.getMultiplier());
+                            subheaderBuilderStub.append("\n");
+                            subheaderBuilderStub.append("Meter No:" + (dpr.getMeterSerial() != null ? dpr.getMeterSerial() : '-') + "\tType: " + dpr.getAccountType());
+                            subheaderBuilderStub.append("\n");
+                            subheaderBuilderStub.append("KwH Used: " + bills.getKwhUsed() + " \tRate: " + ObjectHelpers.roundFour(Double.valueOf(bills.getEffectiveRate())));
+                            subheaderBuilderStub.append("\n");
+                            subheaderBuilderStub.append("Amount Due: P " + ObjectHelpers.roundTwo(Double.valueOf(bills.getNetAmount())));
+                            subheaderBuilderStub.append("\n");
+                            subheaderBuilderStub.append("Arrears: P " + ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsTotal())));
+                            subheaderBuilderStub.append("\n");
+                            subheaderBuilderStub.append("\n");
+                            printer.addText(subheaderBuilderStub.toString());
+
+                            printer.addCut(Printer.CUT_FEED);
+
+                            printer.connect("BT:" + mmDevice.getAddress(), Printer.PARAM_DEFAULT);
+                            printer.beginTransaction();
+                            printer.sendData(Printer.PARAM_DEFAULT);
+                        } catch (Exception e ) {
+                            e.printStackTrace();
+                        }
+
+                        printer.setReceiveEventListener(new ReceiveListener() {
+                            @Override
+                            public void onPtrReceive(Printer printer, int i, PrinterStatusInfo printerStatusInfo, String s) {
+                                if (i == Epos2CallbackCode.CODE_SUCCESS){
+//            Toast.makeText(this, "Printing...", Toast.LENGTH_SHORT).show();
+                                    Log.e("PRINTING_SUCCESS", "Printing ok");
+
+                                    try {
+                                        printer.disconnect();
+                                        printer.clearCommandBuffer();
+                                    } catch (Epos2Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }else{
+                                    try {
+                                        printer.disconnect();
+                                        printer.clearCommandBuffer();
+                                    } catch (Epos2Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                AlertHelpers.showMessageDialog(this, "Printing Error", "Check if Bluetooth is enabled. Also check if the printer is connected to the device.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

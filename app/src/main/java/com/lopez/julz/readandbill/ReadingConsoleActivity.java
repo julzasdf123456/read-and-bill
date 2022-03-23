@@ -48,6 +48,7 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.LibraryLoader;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -121,7 +122,8 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
+        LibraryLoader.load();
+        Mapbox.getInstance(this, getResources().getString(R.string.mapbox_access_token));
         Window window = getWindow();
         WindowManager.LayoutParams winParams = window.getAttributes();
         winParams.flags &= ~WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;

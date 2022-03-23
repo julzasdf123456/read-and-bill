@@ -7,14 +7,17 @@ import androidx.core.content.ContextCompat;
 import androidx.room.Room;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -22,9 +25,14 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.dantsu.escposprinter.EscPosPrinter;
-import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections;
-import com.dantsu.escposprinter.textparser.PrinterTextParserImg;
+import com.epson.epos2.Epos2CallbackCode;
+import com.epson.epos2.Epos2Exception;
+import com.epson.epos2.printer.Printer;
+import com.epson.epos2.printer.PrinterStatusInfo;
+import com.epson.epos2.printer.ReceiveListener;
+import com.epson.eposprint.Builder;
+import com.epson.eposprint.EposException;
+import com.epson.eposprint.Print;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.lopez.julz.readandbill.api.RequestPlaceHolder;
@@ -32,14 +40,21 @@ import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
 import com.lopez.julz.readandbill.dao.Users;
 import com.lopez.julz.readandbill.dao.UsersDao;
+import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
+import com.lopez.julz.readandbill.helpers.Result;
 import com.lopez.julz.readandbill.objects.Login;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity{
 
     public EditText username, password;
     public MaterialButton login;
@@ -71,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
         username = findViewById(R.id.username);
         password = findViewById(R.id.password);
         login = findViewById(R.id.login);
+
 
         retrofitBuilder = new RetrofitBuilder();
         requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
@@ -108,6 +124,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     private void login() {
@@ -259,4 +276,5 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
     }
+
 }

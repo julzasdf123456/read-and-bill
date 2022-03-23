@@ -83,10 +83,19 @@ public class DownloadedPreviousReadings {
     @ColumnInfo(name = "ArrearsTotal")
     private String ArrearsTotal;
 
+    @ColumnInfo(name = "TownFull")
+    private String TownFull;
+
+    @ColumnInfo(name = "BarangayFull")
+    private String BarangayFull;
+
+    @ColumnInfo(name = "Purok")
+    private String Purok;
+
     public DownloadedPreviousReadings() {
     }
 
-    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal) {
+    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal, String townFull, String barangayFull, String purok) {
         this.id = id;
         ServiceAccountName = serviceAccountName;
         Multiplier = multiplier;
@@ -112,6 +121,9 @@ public class DownloadedPreviousReadings {
         MeterSerial = meterSerial;
         ReadingTimestamp = readingTimestamp;
         ArrearsTotal = arrearsTotal;
+        TownFull = townFull;
+        BarangayFull = barangayFull;
+        Purok = purok;
     }
 
     @NonNull
@@ -313,5 +325,29 @@ public class DownloadedPreviousReadings {
 
     public void setArrearsTotal(String arrearsTotal) {
         ArrearsTotal = arrearsTotal;
+    }
+
+    public String getTownFull() {
+        return TownFull;
+    }
+
+    public void setTownFull(String townFull) {
+        TownFull = townFull;
+    }
+
+    public String getBarangayFull() {
+        return BarangayFull;
+    }
+
+    public void setBarangayFull(String barangayFull) {
+        BarangayFull = barangayFull;
+    }
+
+    public String getPurok() {
+        return Purok;
+    }
+
+    public void setPurok(String purok) {
+        Purok = purok;
     }
 }

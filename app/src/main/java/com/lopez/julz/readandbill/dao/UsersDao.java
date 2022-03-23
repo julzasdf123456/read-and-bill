@@ -15,4 +15,7 @@ public interface UsersDao {
 
     @Query("SELECT * FROM Users WHERE Username = :username AND Password = :password")
     Users getOne(String username, String password);
+
+    @Query("SELECT * FROM Users WHERE id = :id")
+    Users getOneById(String id);
 }
