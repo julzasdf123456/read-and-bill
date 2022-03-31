@@ -24,6 +24,6 @@ public interface ReadingSchedulesDao {
     @Query("DELETE FROM ReadingSchedules WHERE id = :id")
     void deleteOne(String id);
 
-    @Query("SELECT * FROM ReadingSchedules WHERE Status IS NULL")
+    @Query("SELECT * FROM ReadingSchedules WHERE Status IS NULL ORDER BY GroupCode")
     List<ReadingSchedules> getActiveSchedules();
 }

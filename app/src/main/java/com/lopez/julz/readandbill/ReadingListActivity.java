@@ -80,7 +80,7 @@ public class ReadingListActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 readingSchedulesList.addAll(db.readingSchedulesDao().getActiveSchedules());
-                Log.e("TEST", readingSchedulesList.size() + "");
+//                Log.e("TEST", readingSchedulesList.size() + "");
             } catch (Exception e) {
                 Log.e("ERR_GET_ACTV_SCHD", e.getMessage());
             }
@@ -90,7 +90,7 @@ public class ReadingListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void unused) {
             super.onPostExecute(unused);
-//            new RemoveFinishedReadings().execute();
+            new RemoveFinishedReadings().execute();
         }
     }
 
@@ -106,15 +106,59 @@ public class ReadingListActivity extends AppCompatActivity {
                 for (int i=0; i<size; i++) {
                     ReadingSchedules readingSchedules = listTmp.get(i);
                     List<DownloadedPreviousReadings> dprList = db.downloadedPreviousReadingsDao().getAllUnread(readingSchedules.getServicePeriod(), readingSchedules.getAreaCode(), readingSchedules.getGroupCode());
-//                    Log.e("TEST", dprList.size() +"");
                     if (dprList.size() > 0) {
 
                     } else {
+                        ReadingSchedules rs = readingSchedulesList.get(i);
+                        rs.setStatus("DONE");
+                        rs.setStatus("Yes");
+                        db.readingSchedulesDao().updateAll(rs);
+                        Log.e("DONE_READ", rs.getAreaCode() + " - " + rs.getGroupCode() + " marked DONE reading");
                         readingSchedulesList.remove(i);
                     }
                 }
+
+                // FILTER 3-DAY READING RULE
+                int updatedSize = readingSchedulesList.size();
+                for (int x=0; x<updatedSize; x++) {
+                    ReadingSchedules rs = readingSchedulesList.get(x);
+                    if (x > 1) { // THIRD RANK IN THE READING LIST (THIRD DAY)
+                        // UPDATE TO DISABLE
+                        rs.setDisabled("Yes");
+                    } else {
+                        // UPDATE TO ENABLE
+                        rs.setDisabled(null);
+                    }
+                    db.readingSchedulesDao().updateAll(rs);
+                }
             } catch (Exception e) {
                 Log.e("ERR_REMOVE_FINISHED_RED", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            new ValidateAndShowSchedules().execute();
+        }
+    }
+
+    public class ValidateAndShowSchedules extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            readingSchedulesList.clear();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                readingSchedulesList.addAll(db.readingSchedulesDao().getActiveSchedules());
+//                Log.e("TEST", readingSchedulesList.size() + "");
+            } catch (Exception e) {
+                Log.e("ERR_GET_ACTV_SCHD", e.getMessage());
             }
             return null;
         }

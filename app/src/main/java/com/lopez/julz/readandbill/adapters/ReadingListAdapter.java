@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +15,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.lopez.julz.readandbill.R;
 import com.lopez.julz.readandbill.ReadingConsoleActivity;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
+import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 
 import java.util.List;
@@ -46,17 +48,26 @@ public class ReadingListAdapter extends RecyclerView.Adapter<ReadingListAdapter.
         holder.billingMonth.setText("Billing Month: " + ObjectHelpers.formatShortDate(readingSchedule.getServicePeriod()));
         holder.scheduledDate.setText("Scheduled On: " + ObjectHelpers.formatShortDateWithDate(readingSchedule.getScheduledDate()));
 
-        holder.parent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, ReadingConsoleActivity.class);
-                intent.putExtra("USERID", userId);
-                intent.putExtra("AREACODE", readingSchedule.getAreaCode());
-                intent.putExtra("GROUPCODE", readingSchedule.getGroupCode());
-                intent.putExtra("SERVICEPERIOD", readingSchedule.getServicePeriod());
-                context.startActivity(intent);
-            }
-        });
+        if (readingSchedule.getDisabled() != null && readingSchedule.getDisabled().equals("Yes")) {
+            holder.parent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AlertHelpers.showMessageDialog(context, "Prohibited", "You need to finish reading the last reading schedules first before you can proceed to this schedule.");
+                }
+            });
+        } else {
+            holder.parent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, ReadingConsoleActivity.class);
+                    intent.putExtra("USERID", userId);
+                    intent.putExtra("AREACODE", readingSchedule.getAreaCode());
+                    intent.putExtra("GROUPCODE", readingSchedule.getGroupCode());
+                    intent.putExtra("SERVICEPERIOD", readingSchedule.getServicePeriod());
+                    context.startActivity(intent);
+                }
+            });
+        }
     }
 
     @Override

@@ -57,7 +57,16 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
                 holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_check_circle_outline_18);
             }
         } else {
-            holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_error_outline_18);
+            if (downloadedPreviousReadings.getStatus() != null) {
+                if (downloadedPreviousReadings.getStatus().equals("READ")) {
+                    holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_check_circle_red_18);
+                } else {
+                    holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_error_outline_18);
+                }
+            } else {
+                holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_error_outline_18);
+            }
+
         }
 
         holder.accountParent.setOnClickListener(new View.OnClickListener() {

@@ -240,6 +240,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                     Log.e("ERR_GET_LOC", e.getMessage());
                                 }
                             }
+
                             new ReadAndBill().execute(reading);
                         } else {
                             String prevKwh = currentDpr.getKwhUsed() != null ? currentDpr.getKwhUsed() : "0";
@@ -544,6 +545,12 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         protected Void doInBackground(String... strings) {
             try {
                 currentDpr = db.downloadedPreviousReadingsDao().getOne(strings[0]);
+
+                // CONFIGURE CONSUMER TYPE
+                if (currentDpr.getAccountType().equals("NONE")) {
+                    currentDpr.setAccountType("RESIDENTIAL");
+                }
+
                 currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
                 currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                 currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
@@ -569,12 +576,6 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             seniorCitizen.setText(currentDpr.getSeniorCitizen() != null ? currentDpr.getSeniorCitizen() : "No");
             currentArrears.setText(currentDpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getArrearsLedger())) : "0.0");
             totalArrears.setText(currentDpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getBalance())) : "0.0");
-
-            if (currentDpr.getAccountStatus().equals("DISCONNECTED")) {
-                billBtn.setEnabled(false);
-            } else {
-                billBtn.setEnabled(true);
-            }
 
             /**
              * IF ALREADY READ
@@ -683,12 +684,6 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
             prevBtn.setEnabled(true);
             nextBtn.setEnabled(true);
-
-            if (currentDpr.getAccountStatus().equals("DISCONNECTED")) {
-                billBtn.setEnabled(false);
-            } else {
-                billBtn.setEnabled(true);
-            }
 
             plotMarker();
 
@@ -829,18 +824,22 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                         currentDpr.setStatus("READ");
                         db.downloadedPreviousReadingsDao().updateAll(currentDpr);
 
-                        /** PERFORM BILLING **/
-                        if (kwhConsumed == 0) {
+                        if (currentDpr.getAccountStatus() != null && currentDpr.getAccountStatus().equals("DISCONNECTED")) {
 
                         } else {
-                            if (currentBill != null) {
-                                currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+                            /** PERFORM BILLING **/
+                            if (kwhConsumed == 0) {
 
-                                db.billsDao().updateAll(currentBill);
                             } else {
-                                currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+                                if (currentBill != null) {
+                                    currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
 
-                                db.billsDao().insertAll(currentBill);
+                                    db.billsDao().updateAll(currentBill);
+                                } else {
+                                    currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                    db.billsDao().insertAll(currentBill);
+                                }
                             }
                         }
                     }
