@@ -198,7 +198,8 @@ public class UploadReadingsActivity extends AppCompatActivity {
         try {
             if (billsList.size() > 0) {
                 Call<Bills> billsCall = requestPlaceHolder.uploadBills(billsList.get(0));
-                Log.e("UPLD_BILL", billsList.get(0).getAccountNumber());
+                Log.e("UPLD_BILL", billsList.get(0).getAccountNumber() + " - " + billsList.get(0).getNetAmount());
+
 
                 billsCall.enqueue(new Callback<Bills>() {
                     @Override
@@ -219,6 +220,17 @@ public class UploadReadingsActivity extends AppCompatActivity {
                                 uploadProgress.setMax(billsList.size());
                                 uploadStatusText.setText("Uploading Images...");
                                 uploadImages();
+                            }
+                        } else {
+                            try {
+                                Log.e("ERR_UPLD_BILLS", response.raw() + "\n" + response.errorBody().string() );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Bills Upload Failed", response.raw() + "\n" + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         }
                     }

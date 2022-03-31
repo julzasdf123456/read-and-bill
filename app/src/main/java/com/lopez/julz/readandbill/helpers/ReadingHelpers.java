@@ -162,7 +162,7 @@ public class ReadingHelpers {
         }
     }
 
-    public static String getNetAmount(Bills bill) {
+    public static String getNetAmount(DownloadedPreviousReadings dpr, Bills bill) {
         try {
             double amount = 0.0;
 
@@ -302,7 +302,27 @@ public class ReadingHelpers {
 
                     bill.setDistributionVAT(getDistributionVat(bill));
 
-                    bill.setNetAmount(getNetAmount(bill));
+                    bill.setNetAmount(getNetAmount(dpr, bill));
+
+                    /**
+                     * FOR DEPOSITS/PREPAYMENTS
+                     */
+                    if (dpr.getDeposit() != null) {
+                        double depositAmount = Double.valueOf(dpr.getDeposit());
+                        double netAmnt = Double.valueOf(bill.getNetAmount());
+                        double difOfNetAmount = netAmnt - depositAmount;
+
+                        if (difOfNetAmount > 0) {
+                            bill.setNetAmount(ObjectHelpers.roundFourNoComma(difOfNetAmount));
+                            bill.setDeductedDeposit(ObjectHelpers.roundFourNoComma(depositAmount));
+                            bill.setExcessDeposit("0");
+                        } else {
+                            double depositVal = depositAmount - netAmnt;
+                            bill.setNetAmount("0.0");
+                            bill.setDeductedDeposit(ObjectHelpers.roundFourNoComma(netAmnt));
+                            bill.setExcessDeposit(ObjectHelpers.roundFourNoComma(depositVal));
+                        }
+                    }
 
                     bill.setUserId(userId);
                     bill.setBilledFrom("APP");
@@ -378,7 +398,27 @@ public class ReadingHelpers {
 
                     bill.setDistributionVAT(getDistributionVat(bill));
 
-                    bill.setNetAmount(getNetAmount(bill));
+                    bill.setNetAmount(getNetAmount(dpr, bill));
+
+                    /**
+                     * FOR DEPOSITS/PREPAYMENTS
+                     */
+                    if (dpr.getDeposit() != null) {
+                        double depositAmount = Double.valueOf(dpr.getDeposit());
+                        double netAmnt = Double.valueOf(bill.getNetAmount());
+                        double difOfNetAmount = netAmnt - depositAmount;
+
+                        if (difOfNetAmount > 0) {
+                            bill.setNetAmount(ObjectHelpers.roundFourNoComma(difOfNetAmount));
+                            bill.setDeductedDeposit(ObjectHelpers.roundFourNoComma(depositAmount));
+                            bill.setExcessDeposit("0");
+                        } else {
+                            double depositVal = depositAmount - netAmnt;
+                            bill.setNetAmount("0.0");
+                            bill.setDeductedDeposit(ObjectHelpers.roundFourNoComma(netAmnt));
+                            bill.setExcessDeposit(ObjectHelpers.roundFourNoComma(depositVal));
+                        }
+                    }
 
                     bill.setUserId(userId);
                     bill.setBilledFrom("APP");
@@ -393,6 +433,14 @@ public class ReadingHelpers {
         } catch (Exception e) {
             Log.e("ERR_GENRTE_BILL", e.getMessage());
             return null;
+        }
+    }
+
+    public static String getAccountType(DownloadedPreviousReadings dpr) {
+        if (dpr.getAccountType().equals("RURAL RESIDENTIAL")) {
+            return "RESIDENTIAL";
+        } else {
+            return dpr.getAccountType();
         }
     }
 }

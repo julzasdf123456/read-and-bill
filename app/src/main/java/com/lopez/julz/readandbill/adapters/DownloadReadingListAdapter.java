@@ -146,9 +146,11 @@ public class DownloadReadingListAdapter extends RecyclerView.Adapter<DownloadRea
                     if (db.readingSchedulesDao().getOne(rd.getId()) == null) {
                         // ADD NEW
                         db.readingSchedulesDao().insertAll(rd);
+                        Log.e("TEST", rd.getAreaCode());
                     } else {
                         // UPDATE
                         db.readingSchedulesDao().updateAll(rd);
+                        Log.e("TEST", rd.getAreaCode());
                     }
                 }
             } catch (Exception e) {

@@ -122,7 +122,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LibraryLoader.load();
+//        LibraryLoader.load();
         Mapbox.getInstance(this, getResources().getString(R.string.mapbox_access_token));
         Window window = getWindow();
         WindowManager.LayoutParams winParams = window.getAttributes();

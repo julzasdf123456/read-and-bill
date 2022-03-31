@@ -544,7 +544,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         protected Void doInBackground(String... strings) {
             try {
                 currentDpr = db.downloadedPreviousReadingsDao().getOne(strings[0]);
-                currentRate = db.ratesDao().getOne(currentDpr.getAccountType(), currentDpr.getAreaCode());
+                currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
                 currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                 currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 user = db.usersDao().getOneById(userId);
@@ -560,9 +560,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             accountName.setText(currentDpr.getServiceAccountName() != null ? currentDpr.getServiceAccountName() : "n/a");
             accountNumber.setText(currentDpr.getId());
             prevReading.setText(currentDpr.getKwhUsed()!=null ? currentDpr.getKwhUsed() : "0");
-            accountType.setText(currentDpr.getAccountType());
+            accountType.setText(ReadingHelpers.getAccountType(currentDpr));
             sequenceCode.setText(currentDpr.getSequenceCode());
-            rate.setText(ObjectHelpers.roundFour(Double.parseDouble(currentRate.getTotalRateVATIncluded())));
+            rate.setText(currentRate.getTotalRateVATIncluded() != null ? (ObjectHelpers.roundFour(Double.parseDouble(currentRate.getTotalRateVATIncluded()))) : "0");
             accountStatus.setText(currentDpr.getAccountStatus());
             multiplier.setText(currentDpr.getMultiplier());
             coreloss.setText(currentDpr.getCoreloss());
@@ -632,18 +632,18 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
         @Override
         protected Void doInBackground(String... strings) { //strings[0] = next, prev | strings[1] = sequence
-            String areaCode = currentDpr.getAreaCode();
+            String areaCode = currentDpr.getTown();
             String groupCode = currentDpr.getGroupCode();
             if (strings[0].equals("prev")) {
                 currentDpr = db.downloadedPreviousReadingsDao().getPrevious(Integer.valueOf(strings[1]), areaCode, groupCode);
 
                 if (currentDpr == null) {
                     currentDpr = db.downloadedPreviousReadingsDao().getLast(areaCode, groupCode);
-                    currentRate = db.ratesDao().getOne(currentDpr.getAccountType(), currentDpr.getAreaCode());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 } else {
-                    currentRate = db.ratesDao().getOne(currentDpr.getAccountType(), currentDpr.getAreaCode());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 }
@@ -652,11 +652,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                 if (currentDpr == null) {
                     currentDpr = db.downloadedPreviousReadingsDao().getFirst(areaCode, groupCode);
-                    currentRate = db.ratesDao().getOne(currentDpr.getAccountType(), currentDpr.getAreaCode());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 } else {
-                    currentRate = db.ratesDao().getOne(currentDpr.getAccountType(), currentDpr.getAreaCode());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 }
@@ -671,7 +671,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             accountName.setText(currentDpr.getServiceAccountName() != null ? currentDpr.getServiceAccountName() : "n/a");
             accountNumber.setText(currentDpr.getId());
             prevReading.setText(currentDpr.getKwhUsed()!=null ? currentDpr.getKwhUsed() : "0");
-            accountType.setText(currentDpr.getAccountType());
+            accountType.setText(ReadingHelpers.getAccountType(currentDpr));
             sequenceCode.setText(currentDpr.getSequenceCode());
             rate.setText(ObjectHelpers.roundFour(Double.parseDouble(currentRate.getTotalRateVATIncluded())));
             accountStatus.setText(currentDpr.getAccountStatus());
@@ -843,7 +843,6 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                 db.billsDao().insertAll(currentBill);
                             }
                         }
-
                     }
                 }
                 return true;
@@ -1413,6 +1412,12 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                         printer.disconnect();
                                         printer.clearCommandBuffer();
                                     } catch (Epos2Exception e) {
+                                        try {
+                                            printer.disconnect();
+                                        } catch (Epos2Exception epos2Exception) {
+                                            epos2Exception.printStackTrace();
+                                        }
+                                        printer.clearCommandBuffer();
                                         e.printStackTrace();
                                     }
                                 }else{
@@ -1420,6 +1425,12 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                         printer.disconnect();
                                         printer.clearCommandBuffer();
                                     } catch (Epos2Exception e) {
+                                        try {
+                                            printer.disconnect();
+                                        } catch (Epos2Exception epos2Exception) {
+                                            epos2Exception.printStackTrace();
+                                        }
+                                        printer.clearCommandBuffer();
                                         e.printStackTrace();
                                     }
                                 }

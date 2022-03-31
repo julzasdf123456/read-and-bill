@@ -200,10 +200,16 @@ public class Bills {
     @ColumnInfo(name = "UploadStatus")
     private String UploadStatus;
 
+    @ColumnInfo(name = "DeductedDeposit")
+    private String DeductedDeposit;
+
+    @ColumnInfo(name = "ExcessDeposit")
+    private String ExcessDeposit;
+
     public Bills() {
     }
 
-    public Bills(@NonNull String id, String billNumber, String accountNumber, String servicePeriod, String multiplier, String coreloss, String kwhUsed, String previousKwh, String presentKwh, String demandPreviousKwh, String demandPresentKwh, String additionalKwh, String additionalDemandKwh, String kwhAmount, String effectiveRate, String additionalCharges, String deductions, String netAmount, String billingDate, String serviceDateFrom, String serviceDateTo, String dueDate, String meterNumber, String consumerType, String billType, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String realPropertyTax, String otherGenerationRateAdjustment, String otherTransmissionCostAdjustmentKW, String otherTransmissionCostAdjustmentKWH, String otherSystemLossCostAdjustment, String otherLifelineRateCostAdjustment, String seniorCitizenDiscountAndSubsidyAdjustment, String franchiseTax, String businessTax, String notes, String userId, String billedFrom, String uploadStatus) {
+    public Bills(@NonNull String id, String billNumber, String accountNumber, String servicePeriod, String multiplier, String coreloss, String kwhUsed, String previousKwh, String presentKwh, String demandPreviousKwh, String demandPresentKwh, String additionalKwh, String additionalDemandKwh, String kwhAmount, String effectiveRate, String additionalCharges, String deductions, String netAmount, String billingDate, String serviceDateFrom, String serviceDateTo, String dueDate, String meterNumber, String consumerType, String billType, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String realPropertyTax, String otherGenerationRateAdjustment, String otherTransmissionCostAdjustmentKW, String otherTransmissionCostAdjustmentKWH, String otherSystemLossCostAdjustment, String otherLifelineRateCostAdjustment, String seniorCitizenDiscountAndSubsidyAdjustment, String franchiseTax, String businessTax, String notes, String userId, String billedFrom, String uploadStatus, String deductedDeposit, String excessDeposit) {
         this.id = id;
         BillNumber = billNumber;
         AccountNumber = accountNumber;
@@ -267,6 +273,8 @@ public class Bills {
         UserId = userId;
         BilledFrom = billedFrom;
         UploadStatus = uploadStatus;
+        DeductedDeposit = deductedDeposit;
+        ExcessDeposit = excessDeposit;
     }
 
     public void setId(@NonNull String id) {
@@ -772,5 +780,21 @@ public class Bills {
 
     public void setBusinessTax(String businessTax) {
         BusinessTax = businessTax;
+    }
+
+    public String getDeductedDeposit() {
+        return DeductedDeposit;
+    }
+
+    public void setDeductedDeposit(String deductedDeposit) {
+        DeductedDeposit = deductedDeposit;
+    }
+
+    public String getExcessDeposit() {
+        return ExcessDeposit;
+    }
+
+    public void setExcessDeposit(String excessDeposit) {
+        ExcessDeposit = excessDeposit;
     }
 }

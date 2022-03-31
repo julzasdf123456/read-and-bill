@@ -92,10 +92,13 @@ public class DownloadedPreviousReadings {
     @ColumnInfo(name = "Purok")
     private String Purok;
 
+    @ColumnInfo(name = "Deposit")
+    private String Deposit;
+
     public DownloadedPreviousReadings() {
     }
 
-    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal, String townFull, String barangayFull, String purok) {
+    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal, String townFull, String barangayFull, String purok, String deposit) {
         this.id = id;
         ServiceAccountName = serviceAccountName;
         Multiplier = multiplier;
@@ -124,6 +127,7 @@ public class DownloadedPreviousReadings {
         TownFull = townFull;
         BarangayFull = barangayFull;
         Purok = purok;
+        Deposit = deposit;
     }
 
     @NonNull
@@ -349,5 +353,13 @@ public class DownloadedPreviousReadings {
 
     public void setPurok(String purok) {
         Purok = purok;
+    }
+
+    public String getDeposit() {
+        return Deposit;
+    }
+
+    public void setDeposit(String deposit) {
+        Deposit = deposit;
     }
 }

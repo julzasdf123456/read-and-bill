@@ -80,6 +80,7 @@ public class ReadingListActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 readingSchedulesList.addAll(db.readingSchedulesDao().getActiveSchedules());
+                Log.e("TEST", readingSchedulesList.size() + "");
             } catch (Exception e) {
                 Log.e("ERR_GET_ACTV_SCHD", e.getMessage());
             }
@@ -89,7 +90,7 @@ public class ReadingListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void unused) {
             super.onPostExecute(unused);
-            new RemoveFinishedReadings().execute();
+//            new RemoveFinishedReadings().execute();
         }
     }
 

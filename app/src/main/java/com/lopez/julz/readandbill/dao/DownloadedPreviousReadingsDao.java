@@ -25,21 +25,21 @@ public interface DownloadedPreviousReadingsDao {
     @Query("DELETE FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod")
     void deleteAllByServicePeriod(String servicePeriod);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND AreaCode = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode ORDER BY ServiceAccountName")
     List<DownloadedPreviousReadings> getAllFromSchedule(String servicePeriod, String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) > :sequenceCode AND AreaCode = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode LIMIT 1")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) > :sequenceCode AND Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode LIMIT 1")
     DownloadedPreviousReadings getNext(int sequenceCode, String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) < :sequenceCode AND AreaCode = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) < :sequenceCode AND Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
     DownloadedPreviousReadings getPrevious(int sequenceCode, String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE AreaCode = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode LIMIT 1")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode LIMIT 1")
     DownloadedPreviousReadings getFirst(String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE AreaCode = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
     DownloadedPreviousReadings getLast(String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND AreaCode = :areaCode AND GroupCode = :groupCode AND Status IS NULL")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status IS NULL")
     List<DownloadedPreviousReadings> getAllUnread(String servicePeriod, String areaCode, String groupCode);
 }
