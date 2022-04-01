@@ -34,10 +34,12 @@ import com.epson.eposprint.Builder;
 import com.epson.eposprint.EposException;
 import com.epson.eposprint.Print;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
+import com.lopez.julz.readandbill.dao.Settings;
 import com.lopez.julz.readandbill.dao.Users;
 import com.lopez.julz.readandbill.dao.UsersDao;
 import com.lopez.julz.readandbill.helpers.AlertHelpers;
@@ -64,6 +66,9 @@ public class LoginActivity extends AppCompatActivity{
 
     public AppDatabase db;
 
+    public Settings settings;
+    public FloatingActionButton settingsBtn;
+
     private static final int WIFI_PERMISSION = 100;
     private static final int STORAGE_PERMISSION_READ = 101;
     private static final int STORAGE_PERMISSION_WRITE = 102;
@@ -83,22 +88,21 @@ public class LoginActivity extends AppCompatActivity{
 
         setContentView(R.layout.activity_login);
 
+//        new FetchSettings().execute();
+
         username = findViewById(R.id.username);
         password = findViewById(R.id.password);
         login = findViewById(R.id.login);
-
-
-        retrofitBuilder = new RetrofitBuilder();
-        requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
+        settingsBtn = findViewById(R.id.settingsBtn);
 
         db = Room.databaseBuilder(this,
                 AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
 
         checkPermission(Manifest.permission.CAMERA, CAMERA);
+        checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION);
         checkPermission(Manifest.permission.ACCESS_WIFI_STATE, WIFI_PERMISSION);
         checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_PERMISSION_READ);
         checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_WRITE);
-        checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION);
         checkPermission(Manifest.permission.READ_PHONE_STATE, PHONE);
 
         login.setOnClickListener(new View.OnClickListener() {
@@ -125,6 +129,18 @@ public class LoginActivity extends AppCompatActivity{
             }
         });
 
+        settingsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(LoginActivity.this, SettingsActivity.class));
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new FetchSettings().execute();
     }
 
     private void login() {
@@ -219,13 +235,10 @@ public class LoginActivity extends AppCompatActivity{
     }
 
     public void checkPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(LoginActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
-
-            // Requesting the permission
+        if (ContextCompat.checkSelfPermission(LoginActivity.this, permission) == PackageManager.PERMISSION_DENIED) {             // Requesting the permission
             ActivityCompat.requestPermissions(LoginActivity.this, new String[] { permission }, requestCode);
-        }
-        else {
-//            Toast.makeText(LoginActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
+        } else {
+
         }
     }
 
@@ -235,41 +248,35 @@ public class LoginActivity extends AppCompatActivity{
         if (requestCode == WIFI_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(LoginActivity.this, "Wi-Fi Permission Granted", Toast.LENGTH_SHORT) .show();
-            }
-            else {
+            } else {
                 Toast.makeText(LoginActivity.this, "Wi-Fi Permission Denied", Toast.LENGTH_SHORT) .show();
             }
         } else if (requestCode == STORAGE_PERMISSION_READ) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(LoginActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(LoginActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == STORAGE_PERMISSION_WRITE) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(LoginActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(LoginActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == CAMERA) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(LoginActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(LoginActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == LOCATION) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(LoginActivity.this, "Location Permission Granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(LoginActivity.this, "Location Permission Denied", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == PHONE) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(LoginActivity.this, "Phone Permission Granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(LoginActivity.this, "Phone Permission Denied", Toast.LENGTH_SHORT).show();
@@ -277,4 +284,27 @@ public class LoginActivity extends AppCompatActivity{
         }
     }
 
+    public class FetchSettings extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                settings = db.settingsDao().getSettings();
+            } catch (Exception e) {
+                Log.e("ERR_FETCH_SETTINGS", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            if (settings != null) {
+                retrofitBuilder = new RetrofitBuilder(settings.getDefaultServer());
+                requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
+            } else {
+                startActivity(new Intent(LoginActivity.this, SettingsActivity.class));
+            }
+        }
+    }
 }

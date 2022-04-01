@@ -3,6 +3,7 @@ package com.lopez.julz.readandbill;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.room.Room;
 
 import android.os.AsyncTask;
@@ -15,14 +16,18 @@ import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.lopez.julz.readandbill.adapters.DownloadReadingListAdapter;
 import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
+import com.lopez.julz.readandbill.dao.Settings;
 import com.lopez.julz.readandbill.dao.TrackNames;
 import com.lopez.julz.readandbill.dao.Tracks;
+import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,6 +45,7 @@ public class UploadActivity extends AppCompatActivity {
     private RequestPlaceHolder requestPlaceHolder;
 
     public AppDatabase db;
+    public Settings settings;
 
     int totalCountTracks = 0;
     int progressUpload = 0;
@@ -50,8 +56,7 @@ public class UploadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_upload);
 
         db = Room.databaseBuilder(this, AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
-        retrofitBuilder = new RetrofitBuilder();
-        requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
+        new FetchSettings().execute();
 
         toolbarUploadTracks = findViewById(R.id.toolbarUploadTracks);
         setSupportActionBar(toolbarUploadTracks);
@@ -67,13 +72,6 @@ public class UploadActivity extends AppCompatActivity {
 
         uploadBtn.setEnabled(false);
         new InitializeUploadables().execute();
-
-        uploadBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new UploadTrackNames().execute();
-            }
-        });
     }
 
     @Override
@@ -82,6 +80,37 @@ public class UploadActivity extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public class FetchSettings extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                settings = db.settingsDao().getSettings();
+            } catch (Exception e) {
+                Log.e("ERR_FETCH_SETTINGS", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            if (settings != null) {
+                retrofitBuilder = new RetrofitBuilder(settings.getDefaultServer());
+                requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
+
+                uploadBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        new UploadTrackNames().execute();
+                    }
+                });
+            } else {
+                AlertHelpers.showMessageDialog(UploadActivity.this, "Settings Not Initialized", "Failed to load settings. Go to settings and set all necessary parameters to continue.");
+            }
+        }
     }
 
     public class InitializeUploadables extends AsyncTask<Void, Void, Void> {

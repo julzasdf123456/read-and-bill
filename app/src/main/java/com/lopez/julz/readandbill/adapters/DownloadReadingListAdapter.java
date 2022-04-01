@@ -17,6 +17,7 @@ import androidx.room.Room;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.lopez.julz.readandbill.DownloadReadingListActivity;
 import com.lopez.julz.readandbill.R;
 import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
@@ -25,6 +26,8 @@ import com.lopez.julz.readandbill.dao.DownloadedPreviousReadings;
 import com.lopez.julz.readandbill.dao.DownloadedPreviousReadingsDao;
 import com.lopez.julz.readandbill.dao.Rates;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
+import com.lopez.julz.readandbill.dao.Settings;
+import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 
 import java.util.List;
@@ -37,17 +40,19 @@ public class DownloadReadingListAdapter extends RecyclerView.Adapter<DownloadRea
 
     public List<ReadingSchedules> readingSchedulesList;
     public Context context;
+    public Settings settings;
 
     public RetrofitBuilder retrofitBuilder;
     private RequestPlaceHolder requestPlaceHolder;
 
     public AppDatabase db;
 
-    public DownloadReadingListAdapter(List<ReadingSchedules> readingSchedulesList, Context context) {
+    public DownloadReadingListAdapter(List<ReadingSchedules> readingSchedulesList, Context context, Settings settings) {
         this.readingSchedulesList = readingSchedulesList;
         this.context = context;
+        this.settings = settings;
 
-        retrofitBuilder = new RetrofitBuilder();
+        retrofitBuilder = new RetrofitBuilder(settings.getDefaultServer());
         requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
 
         db = Room.databaseBuilder(context, AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();

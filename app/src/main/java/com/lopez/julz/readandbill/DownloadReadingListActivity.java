@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -17,7 +19,10 @@ import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
+import com.lopez.julz.readandbill.dao.Settings;
+import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
+import com.lopez.julz.readandbill.helpers.SettingsHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +43,7 @@ public class DownloadReadingListActivity extends AppCompatActivity {
     private RequestPlaceHolder requestPlaceHolder;
 
     public AppDatabase db;
+    public Settings settings;
 
     public String userId;
 
@@ -45,6 +51,8 @@ public class DownloadReadingListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download_reading_list);
+
+        db = Room.databaseBuilder(this, AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
 
         downloadReadingListToolbar = findViewById(R.id.downloadReadingListToolbar);
         setSupportActionBar(downloadReadingListToolbar);
@@ -55,18 +63,7 @@ public class DownloadReadingListActivity extends AppCompatActivity {
 
         userId = getIntent().getExtras().getString("USERID");
 
-        retrofitBuilder = new RetrofitBuilder();
-        requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
-
-        db = Room.databaseBuilder(this, AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
-
-        downloadReadingListRecyclerview = findViewById(R.id.downloadReadingListRecyclerview);
-        readingSchedulesList = new ArrayList<>();
-        readingListAdapter = new DownloadReadingListAdapter(readingSchedulesList, this);
-        downloadReadingListRecyclerview.setAdapter(readingListAdapter);
-        downloadReadingListRecyclerview.setLayoutManager(new LinearLayoutManager(this));
-
-        fetchDownloadableSchedules();
+        new FetchSettings().execute();
     }
 
     public void fetchDownloadableSchedules() {
@@ -104,5 +101,37 @@ public class DownloadReadingListActivity extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public class FetchSettings extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                settings = db.settingsDao().getSettings();
+            } catch (Exception e) {
+                Log.e("ERR_FETCH_SETTINGS", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            if (settings != null) {
+                retrofitBuilder = new RetrofitBuilder(settings.getDefaultServer());
+                requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
+
+                downloadReadingListRecyclerview = findViewById(R.id.downloadReadingListRecyclerview);
+                readingSchedulesList = new ArrayList<>();
+                readingListAdapter = new DownloadReadingListAdapter(readingSchedulesList, DownloadReadingListActivity.this, settings);
+                downloadReadingListRecyclerview.setAdapter(readingListAdapter);
+                downloadReadingListRecyclerview.setLayoutManager(new LinearLayoutManager(DownloadReadingListActivity.this));
+
+                fetchDownloadableSchedules();
+            } else {
+                AlertHelpers.showMessageDialog(DownloadReadingListActivity.this, "Settings Not Initialized", "Failed to load settings. Go to settings and set all necessary parameters to continue.");
+            }
+        }
     }
 }

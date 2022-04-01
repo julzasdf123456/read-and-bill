@@ -20,6 +20,7 @@ import com.lopez.julz.readandbill.dao.AppDatabase;
 import com.lopez.julz.readandbill.dao.Bills;
 import com.lopez.julz.readandbill.dao.ReadingImages;
 import com.lopez.julz.readandbill.dao.Readings;
+import com.lopez.julz.readandbill.dao.Settings;
 import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 
@@ -48,6 +49,7 @@ public class UploadReadingsActivity extends AppCompatActivity {
     public List<ReadingImages> imagesList;
 
     public AppDatabase db;
+    public Settings settings;
 
     public RetrofitBuilder retrofitBuilder;
     private RequestPlaceHolder requestPlaceHolder;
@@ -69,9 +71,6 @@ public class UploadReadingsActivity extends AppCompatActivity {
 
         db = Room.databaseBuilder(this, AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
 
-        retrofitBuilder = new RetrofitBuilder();
-        requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
-
         uploadbleReadings = findViewById(R.id.uploadbleReadings);
         uploadbleImages = findViewById(R.id.uploadbleImages);
         uploadbleBills = findViewById(R.id.uploadbleBills);
@@ -81,8 +80,8 @@ public class UploadReadingsActivity extends AppCompatActivity {
         readingsList = new ArrayList<>();
         billsList = new ArrayList<>();
         imagesList = new ArrayList<>();
-
-        new FetchData().execute();
+        uploadButton.setEnabled(false);
+        new FetchSettings().execute();
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -375,6 +374,32 @@ public class UploadReadingsActivity extends AppCompatActivity {
                 Log.e("ERR_UPDT_READNGS", e.getMessage());
             }
             return null;
+        }
+    }
+
+    public class FetchSettings extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                settings = db.settingsDao().getSettings();
+            } catch (Exception e) {
+                Log.e("ERR_FETCH_SETTINGS", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            if (settings != null) {
+                retrofitBuilder = new RetrofitBuilder(settings.getDefaultServer());
+                requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
+
+                new FetchData().execute();
+            } else {
+                AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Settings Not Initialized", "Failed to load settings. Go to settings and set all necessary parameters to continue.");
+            }
         }
     }
 }

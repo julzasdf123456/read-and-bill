@@ -6,6 +6,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitBuilder {
     public Retrofit retrofit;
 
+    public RetrofitBuilder(String ip) {
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BaseURL.baseUrl(ip))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
     public RetrofitBuilder() {
         retrofit = new Retrofit.Builder()
                 .baseUrl(BaseURL.baseUrl())
