@@ -18,4 +18,7 @@ public interface UsersDao {
 
     @Query("SELECT * FROM Users WHERE id = :id")
     Users getOneById(String id);
+
+    @Query("SELECT * FROM Users ORDER BY id DESC LIMIT 1")
+    Users getFirst();
 }

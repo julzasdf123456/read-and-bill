@@ -105,6 +105,8 @@ public class LoginActivity extends AppCompatActivity{
         checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_WRITE);
         checkPermission(Manifest.permission.READ_PHONE_STATE, PHONE);
 
+        new CommenceAutoLogin().execute();
+
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -304,6 +306,41 @@ public class LoginActivity extends AppCompatActivity{
                 requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
             } else {
                 startActivity(new Intent(LoginActivity.this, SettingsActivity.class));
+            }
+        }
+    }
+
+    public class CommenceAutoLogin extends AsyncTask<Void, Void, Void> {
+
+        boolean doesUserExists = false;
+        String userid = "";
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                UsersDao usersDao = db.usersDao();
+                Users existing = usersDao.getFirst();
+
+                if (existing == null) {
+                    doesUserExists = false;
+                } else {
+                    doesUserExists = true;
+                    userid = existing.getId();
+                }
+            } catch (Exception e) {
+                Log.e("ERR_AUTO_LGN", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            if (doesUserExists) {
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                intent.putExtra("USERID", userid);
+                startActivity(intent);
+                finish();
             }
         }
     }

@@ -7,10 +7,12 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -22,6 +24,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -30,9 +34,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
@@ -116,6 +122,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
     public FloatingActionButton closeBottomSheet;
     public RecyclerView readingListBottomSheetRecyclerview;
     public AccountsListAdapter accountsListAdapter;
+    public EditText search;
 
     int loadCount = 0;
 
@@ -201,6 +208,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
         accountsListAdapter = new AccountsListAdapter(downloadedPreviousReadingsList, ReadingConsoleActivity.this, servicePeriod, userId);
         readingListBottomSheetRecyclerview.setAdapter(accountsListAdapter);
         readingListBottomSheetRecyclerview.setLayoutManager(new LinearLayoutManager(ReadingConsoleActivity.this));
+        search = view.findViewById(R.id.search);
 
         /**
          * Bottom Nav View
@@ -216,6 +224,7 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
                     case R.id.listView:
 
                         bottomSheetDialog.show();
+
                         break;
                 }
                 return false;
@@ -226,6 +235,23 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
             @Override
             public void onClick(View view) {
                 bottomSheetDialog.dismiss();
+            }
+        });
+
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                new Search().execute(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
     }
@@ -509,6 +535,37 @@ public class ReadingConsoleActivity extends AppCompatActivity implements Permiss
             return true;
         } else {
             return false;
+        }
+    }
+
+    public class Search extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            downloadedPreviousReadingsList.clear();
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+                if (strings[0] != null) {
+                    String searchRegex = "%" + strings[0] + "%";
+                    downloadedPreviousReadingsList.addAll(db.downloadedPreviousReadingsDao().getSearch(servicePeriod, areaCode, groupCode, searchRegex));
+                } else {
+                    downloadedPreviousReadingsList.addAll(db.downloadedPreviousReadingsDao().getAllFromSchedule(servicePeriod, areaCode, groupCode));
+                }
+
+            } catch (Exception e) {
+                Log.e("ERR_GET_SEARCH", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            accountsListAdapter.notifyDataSetChanged();
         }
     }
 }

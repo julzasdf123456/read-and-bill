@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.card.MaterialCardView;
 import com.lopez.julz.readandbill.R;
 import com.lopez.julz.readandbill.ReadingConsoleActivity;
+import com.lopez.julz.readandbill.ReadingListViewActivity;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
 import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
@@ -59,7 +60,7 @@ public class ReadingListAdapter extends RecyclerView.Adapter<ReadingListAdapter.
             holder.parent.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(context, ReadingConsoleActivity.class);
+                    Intent intent = new Intent(context, ReadingListViewActivity.class);
                     intent.putExtra("USERID", userId);
                     intent.putExtra("AREACODE", readingSchedule.getAreaCode());
                     intent.putExtra("GROUPCODE", readingSchedule.getGroupCode());

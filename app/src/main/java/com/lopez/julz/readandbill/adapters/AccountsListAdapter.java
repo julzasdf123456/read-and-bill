@@ -44,7 +44,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
         DownloadedPreviousReadings downloadedPreviousReadings = downloadedPreviousReadingsList.get(position);
 
         holder.accountName.setText(downloadedPreviousReadings.getServiceAccountName());
-        holder.accountNumber.setText(downloadedPreviousReadings.getId() + " | " + downloadedPreviousReadings.getAccountType());
+        holder.accountNumber.setText((downloadedPreviousReadings.getOldAccountNo() != null ? downloadedPreviousReadings.getOldAccountNo() : "-" ) + " (" + downloadedPreviousReadings.getId() + ") | " + downloadedPreviousReadings.getAccountType());
 
         if (downloadedPreviousReadings.getAccountStatus().equals("ACTIVE")) {
             if (downloadedPreviousReadings.getStatus() != null) {
@@ -66,7 +66,12 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
             } else {
                 holder.accountStatus.setBackgroundResource(R.drawable.ic_baseline_error_outline_18);
             }
+        }
 
+        if (downloadedPreviousReadings.getMeterSerial() != null) {
+            holder.meterNo.setText("Meter No: " + downloadedPreviousReadings.getMeterSerial());
+        } else {
+            holder.meterNo.setText("Meter No:");
         }
 
         holder.accountParent.setOnClickListener(new View.OnClickListener() {
@@ -89,7 +94,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public MaterialCardView accountParent;
-        public TextView accountName, accountNumber;
+        public TextView accountName, accountNumber, meterNo;
         public ImageView accountStatus;
 
         public ViewHolder(@NonNull View itemView) {
@@ -99,6 +104,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
             accountName = itemView.findViewById(R.id.consumerName);
             accountNumber = itemView.findViewById(R.id.accountNo);
             accountStatus = itemView.findViewById(R.id.accountStatus);
+            meterNo = itemView.findViewById(R.id.meterNo);
         }
     }
 }

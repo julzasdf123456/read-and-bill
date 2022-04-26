@@ -17,6 +17,7 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/settingsBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="58dp"
@@ -27,9 +28,9 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/header_menu_md"
                 android:adjustViewBounds="true"
-                android:scaleType="fitStart" />
+                android:scaleType="fitStart"
+                android:src="@drawable/header_menu_md" />
 
             <TextView
                 style="@style/TextAppearance.AppCompat.Display1"
@@ -49,5 +50,14 @@
             android:padding="15dp"/>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/bottomBarNotif"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/grey_100"
+        android:layout_gravity="bottom"
+        android:text="Server: Blablabal"
+        android:padding="3dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -21,8 +21,10 @@
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_reading_console.xml" value="0.3625" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_reading_form.xml" value="0.33" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_reading_list.xml" value="0.3625" />
+        <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_reading_list_view.xml" value="0.3625" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_record_tracks.xml" value="0.20260416666666667" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_settings.xml" value="0.1703125" />
+        <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_unbilled.xml" value="0.3625" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_upload.xml" value="0.3625" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_upload_disconnection.xml" value="0.20104166666666667" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/layout/activity_upload_readings.xml" value="0.3625" />
@@ -38,6 +40,7 @@
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/menu/create_tracks_menu.xml" value="0.3625" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/menu/image_menu.xml" value="0.3625" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/menu/reading_bottom_nav_menu.xml" value="0.21354166666666666" />
+        <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/menu/reading_list_menu.xml" value="0.3625" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/menu/tracknames_menu.xml" value="0.19479166666666667" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/xml/file_paths.xml" value="0.21041666666666667" />
         <entry key="..\:/AndroidStudioProjects/ReadandBill/app/src/main/res/xml/network_security_config.xml" value="0.3625" />

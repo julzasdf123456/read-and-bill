@@ -25,7 +25,7 @@ public interface DownloadedPreviousReadingsDao {
     @Query("DELETE FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod")
     void deleteAllByServicePeriod(String servicePeriod);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode ORDER BY ServiceAccountName")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode")
     List<DownloadedPreviousReadings> getAllFromSchedule(String servicePeriod, String areaCode, String groupCode);
 
     @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) > :sequenceCode AND Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode LIMIT 1")
@@ -40,6 +40,12 @@ public interface DownloadedPreviousReadingsDao {
     @Query("SELECT * FROM DownloadedPreviousReadings WHERE Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
     DownloadedPreviousReadings getLast(String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status IS NULL")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status IS NULL ORDER BY SequenceCode")
     List<DownloadedPreviousReadings> getAllUnread(String servicePeriod, String areaCode, String groupCode);
+
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status='READ' ORDER BY SequenceCode")
+    List<DownloadedPreviousReadings> getAllRead(String servicePeriod, String areaCode, String groupCode);
+
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE (ServiceAccountName LIKE :regex OR MeterSerial LIKE :regex OR OldAccountNo LIKE :regex) AND ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode ORDER BY ServiceAccountName")
+    List<DownloadedPreviousReadings> getSearch(String servicePeriod, String areaCode, String groupCode, String regex);
 }

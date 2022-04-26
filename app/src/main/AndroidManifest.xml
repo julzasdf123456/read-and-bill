@@ -25,6 +25,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ReadAndBill">
         <activity
+            android:name=".UnbilledActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ReadingListViewActivity"
+            android:exported="true" />
+        <activity
             android:name=".SettingsActivity"
             android:exported="true" />
         <activity
@@ -55,7 +61,8 @@
         <activity
             android:name=".ReadingConsoleActivity"
             android:exported="true"
-            android:theme="@style/Theme.ReadAndBillFullScreen" />
+            android:theme="@style/Theme.ReadAndBillFullScreen"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ReadingListActivity"
             android:exported="true" />

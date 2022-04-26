@@ -18,7 +18,7 @@ import java.util.List;
         ReadingImages.class,
         DisconnectionList.class,
         Settings.class,
-    }, version = 75)
+    }, version = 81)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract TrackNamesDao trackNamesDao();
 

@@ -95,10 +95,16 @@ public class DownloadedPreviousReadings {
     @ColumnInfo(name = "Deposit")
     private String Deposit;
 
+    @ColumnInfo(name = "ChangeMeterAdditionalKwh")
+    private String ChangeMeterAdditionalKwh;
+
+    @ColumnInfo(name = "ChangeMeterStartKwh")
+    private String ChangeMeterStartKwh;
+
     public DownloadedPreviousReadings() {
     }
 
-    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal, String townFull, String barangayFull, String purok, String deposit) {
+    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal, String townFull, String barangayFull, String purok, String deposit, String changeMeterAdditionalKwh, String changeMeterStartKwh) {
         this.id = id;
         ServiceAccountName = serviceAccountName;
         Multiplier = multiplier;
@@ -128,6 +134,8 @@ public class DownloadedPreviousReadings {
         BarangayFull = barangayFull;
         Purok = purok;
         Deposit = deposit;
+        ChangeMeterAdditionalKwh = changeMeterAdditionalKwh;
+        ChangeMeterStartKwh = changeMeterStartKwh;
     }
 
     @NonNull
@@ -361,5 +369,21 @@ public class DownloadedPreviousReadings {
 
     public void setDeposit(String deposit) {
         Deposit = deposit;
+    }
+
+    public String getChangeMeterAdditionalKwh() {
+        return ChangeMeterAdditionalKwh;
+    }
+
+    public void setChangeMeterAdditionalKwh(String changeMeterAdditionalKwh) {
+        ChangeMeterAdditionalKwh = changeMeterAdditionalKwh;
+    }
+
+    public String getChangeMeterStartKwh() {
+        return ChangeMeterStartKwh;
+    }
+
+    public void setChangeMeterStartKwh(String changeMeterStartKwh) {
+        ChangeMeterStartKwh = changeMeterStartKwh;
     }
 }
