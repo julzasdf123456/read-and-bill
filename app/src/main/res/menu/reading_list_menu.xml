@@ -12,4 +12,14 @@
         android:title="Map View"
         android:id="@+id/unBilled"
         app:showAsAction="always"/>
+
+    <item
+        android:icon="@drawable/ic_baseline_electric_meter_24"
+        android:title="New Meter Capture"
+        android:id="@+id/newMeterCapture"/>
+
+    <item
+        android:icon="@drawable/ic_baseline_electric_meter_24"
+        android:title="Captured Meters"
+        android:id="@+id/capturedMeters"/>
 </menu>

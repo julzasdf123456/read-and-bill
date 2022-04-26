@@ -49,6 +49,7 @@ import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 import com.lopez.julz.readandbill.helpers.Result;
 import com.lopez.julz.readandbill.objects.Login;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -88,7 +89,10 @@ public class LoginActivity extends AppCompatActivity{
             android.Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.BLUETOOTH
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.ACCESS_NETWORK_STATE
     };
 
     @Override
@@ -132,20 +136,43 @@ public class LoginActivity extends AppCompatActivity{
                 ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+                // CHECK MOBILE DATA
+                boolean mobileDataEnabled = false;
+                try {
+                    Class cmClass = Class.forName(connManager.getClass().getName());
+                    Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
+                    method.setAccessible(true); // Make the method callable
+                    // get the setting for "mobile data"
+                    mobileDataEnabled = (Boolean)method.invoke(connManager);
+                } catch (Exception e) {
+                    // Some problem accessible private API
+                    // TODO do whatever error handling you want here
+                }
+
                 if (mWifi.isConnected()) {
-                    // PERFORM ONLINE LOGIN
+                    // PERFORM ONLINE LOGIN USING WIFI
                     if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
                         Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
                     } else {
                         login();
                     }
                 } else {
-                    // PERFORM OFFLINE LOGIN
-                    if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
-                        Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
+                    if (mobileDataEnabled) {
+                        // PERFORM ONLINE LOGIN USING MOBILE DATA
+                        if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
+                            Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
+                        } else {
+                            login();
+                        }
                     } else {
-                        new LoginOffline().execute(username.getText().toString(), password.getText().toString());
+                        // PERFORM OFFLINE LOGIN
+                        if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
+                            Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
+                        } else {
+                            new LoginOffline().execute(username.getText().toString(), password.getText().toString());
+                        }
                     }
+
                 }
             }
         });

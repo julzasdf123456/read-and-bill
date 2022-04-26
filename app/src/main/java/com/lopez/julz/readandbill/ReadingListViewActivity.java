@@ -1,12 +1,16 @@
 package com.lopez.julz.readandbill;
 
+import static com.lopez.julz.readandbill.helpers.ObjectHelpers.hasPermissions;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -47,6 +51,22 @@ public class ReadingListViewActivity extends AppCompatActivity {
     public AccountsListAdapter accountsListAdapter;
     public List<DownloadedPreviousReadings> downloadedPreviousReadingsList;
 
+    int PERMISSION_ALL = 1;
+    String[] PERMISSIONS = {
+            Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.ACCESS_NETWORK_STATE
+    };
+
     public AppDatabase db;
 
     @Override
@@ -55,6 +75,10 @@ public class ReadingListViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reading_list_view);
 
         db = Room.databaseBuilder(this, AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
 
         toolbarReadingListView = findViewById(R.id.toolbarReadingListView);
         setSupportActionBar(toolbarReadingListView);
@@ -116,6 +140,20 @@ public class ReadingListViewActivity extends AppCompatActivity {
             startActivity(intent);
         } else if (item.getItemId() == R.id.unBilled) {
             Intent intent = new Intent(ReadingListViewActivity.this, UnbilledActivity.class);
+            intent.putExtra("USERID", userId);
+            intent.putExtra("AREACODE", areaCode);
+            intent.putExtra("GROUPCODE", groupCode);
+            intent.putExtra("SERVICEPERIOD", servicePeriod);
+            startActivity(intent);
+        } else if (item.getItemId() == R.id.newMeterCapture) {
+            Intent intent = new Intent(ReadingListViewActivity.this, NewMeterActivity.class);
+            intent.putExtra("USERID", userId);
+            intent.putExtra("AREACODE", areaCode);
+            intent.putExtra("GROUPCODE", groupCode);
+            intent.putExtra("SERVICEPERIOD", servicePeriod);
+            startActivity(intent);
+        } else if (item.getItemId() == R.id.capturedMeters) {
+            Intent intent = new Intent(ReadingListViewActivity.this, NewCapturedMetersActivity.class);
             intent.putExtra("USERID", userId);
             intent.putExtra("AREACODE", areaCode);
             intent.putExtra("GROUPCODE", groupCode);

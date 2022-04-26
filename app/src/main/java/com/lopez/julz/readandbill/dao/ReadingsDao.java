@@ -23,4 +23,7 @@ public interface ReadingsDao {
 
     @Query("SELECT * FROM Readings WHERE UploadStatus = 'UPLOADABLE'")
     List<Readings> getUploadables();
+
+    @Query("SELECT * FROM Readings WHERE AccountNumber IS NULL AND ServicePeriod = :servicePeriod AND  UploadStatus = 'UPLOADABLE'")
+    List<Readings> getNewCapturedReadings(String servicePeriod);
 }

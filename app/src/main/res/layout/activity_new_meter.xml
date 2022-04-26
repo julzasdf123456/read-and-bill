@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NewMeterActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarNewMeter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/readingListTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:text="Capture New Meter"
+                android:layout_gravity="center_vertical"/>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            app:contentPadding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="10">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Meter Number"
+                            style="@style/TextAppearance.AppCompat.Subhead"
+                            android:layout_weight="3"
+                            android:layout_column="1"/>
+
+                        <EditText
+                            android:id="@+id/meterNumberNew"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_column="2"
+                            android:layout_weight="7"
+                            android:hint="Meter Number"
+                            android:inputType="text"
+                            android:background="@drawable/options_custom_form"
+                            android:padding="8dp" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="10"
+                        android:layout_marginTop="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Previous Kwh"
+                            style="@style/TextAppearance.AppCompat.Subhead"
+                            android:layout_weight="3"
+                            android:layout_column="1"/>
+
+                        <EditText
+                            android:id="@+id/prevReadingNew"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_column="2"
+                            android:layout_weight="7"
+                            android:hint="0.0"
+                            android:text="0"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/options_custom_form"
+                            android:padding="8dp" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="10"
+                        android:layout_marginTop="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Present Kwh"
+                            style="@style/TextAppearance.AppCompat.Subhead"
+                            android:layout_weight="3"
+                            android:layout_column="1"/>
+
+                        <EditText
+                            android:id="@+id/presReadingNew"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_column="2"
+                            android:layout_weight="7"
+                            android:hint="0.0"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/options_custom_form"
+                            android:padding="8dp" />
+
+                    </TableRow>
+
+                </TableLayout>
+
+                <EditText
+                    android:id="@+id/notesNew"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/options_custom_form"
+                    android:padding="8dp"
+                    android:inputType="textMultiLine"
+                    android:lines="2"
+                    android:layout_marginTop="10dp"
+                    android:hint="Remarks/Notes/Comments"/>
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/mapviewCaptureMeter"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            app:mapbox_cameraZoom="13" />
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/ic_baseline_download_24"
+        app:tint="@color/white"
+        android:id="@+id/saveNewMeterReading"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
