@@ -117,13 +117,6 @@ public class LoginActivity extends AppCompatActivity{
         db = Room.databaseBuilder(this,
                 AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
 
-//        checkPermission(Manifest.permission.CAMERA, CAMERA);
-//        checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION);
-//        checkPermission(Manifest.permission.ACCESS_WIFI_STATE, WIFI_PERMISSION);
-//        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_PERMISSION_READ);
-//        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_WRITE);
-//        checkPermission(Manifest.permission.READ_PHONE_STATE, PHONE);
-
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
@@ -289,48 +282,6 @@ public class LoginActivity extends AppCompatActivity{
 
         }
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (requestCode == WIFI_PERMISSION) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(LoginActivity.this, "Wi-Fi Permission Granted", Toast.LENGTH_SHORT) .show();
-//            } else {
-//                Toast.makeText(LoginActivity.this, "Wi-Fi Permission Denied", Toast.LENGTH_SHORT) .show();
-//            }
-//        } else if (requestCode == STORAGE_PERMISSION_READ) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(LoginActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(LoginActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
-//            }
-//        } else if (requestCode == STORAGE_PERMISSION_WRITE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(LoginActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(LoginActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
-//            }
-//        } else if (requestCode == CAMERA) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(LoginActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(LoginActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
-//            }
-//        } else if (requestCode == LOCATION) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(LoginActivity.this, "Location Permission Granted", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(LoginActivity.this, "Location Permission Denied", Toast.LENGTH_SHORT).show();
-//            }
-//        } else if (requestCode == PHONE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(LoginActivity.this, "Phone Permission Granted", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(LoginActivity.this, "Phone Permission Denied", Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//    }
 
     public class FetchSettings extends AsyncTask<Void, Void, Void> {
 
