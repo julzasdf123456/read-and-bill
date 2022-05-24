@@ -99,6 +99,18 @@ public class ObjectHelpers {
         }
     }
 
+    public static String formatDetailedDate(String date) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date d = sdf.parse(date);
+            sdf = new SimpleDateFormat("MMM dd, yyyy (EEE) hh:mm aa");
+            return sdf.format(d);
+        } catch (Exception e) {
+            Log.e("ERR_FORMAT_DATE", e.getMessage());
+            return "";
+        }
+    }
+
     public static String formatShortDateWithDate(String date) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -115,7 +127,6 @@ public class ObjectHelpers {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date d = sdf.parse(date);
-            sdf = new SimpleDateFormat("MM-dd-yyyy");
             return sdf.format(d);
         } catch (Exception e) {
             Log.e("ERR_FORMAT_DATE", e.getMessage());
@@ -137,6 +148,15 @@ public class ObjectHelpers {
 
     public static String roundFour(Double doubleX) {
         try {
+            DecimalFormat df = new DecimalFormat("#,###.0000");
+            return df.format(doubleX);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static String roundFour(String doubleX) {
+        try {
             DecimalFormat df = new DecimalFormat("#,###,###.####");
             return df.format(doubleX);
         } catch (Exception e) {
@@ -154,6 +174,15 @@ public class ObjectHelpers {
     }
 
     public static String roundTwo(Double doubleX) {
+        try {
+            DecimalFormat df = new DecimalFormat("#,###.00");
+            return df.format(doubleX);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static String roundTwo(String doubleX) {
         try {
             DecimalFormat df = new DecimalFormat("#,###,###.##");
             return df.format(doubleX);
@@ -205,6 +234,40 @@ public class ObjectHelpers {
         }
     }
 
+    public static String getPreviousMonth(String date) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date d = sdf.parse(date);
+
+            Calendar c = Calendar.getInstance();
+            c.setTime(d);
+            c.add(Calendar.MONTH, -1);
+
+            SimpleDateFormat sdfx = new SimpleDateFormat("yyyy-MM-dd");
+
+            return sdfx.format(c.getTime());
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static String getDisconnection(String date) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date d = sdf.parse(date);
+
+            Calendar c = Calendar.getInstance();
+            c.setTime(d);
+            c.add(Calendar.DATE, +3);
+
+            SimpleDateFormat sdfx = new SimpleDateFormat("yyyy-MM-dd");
+
+            return sdfx.format(c.getTime());
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     public static String generateIDandRandString() {
         return getTimeInMillis() + "-" + generateRandomString();
     }
@@ -218,5 +281,22 @@ public class ObjectHelpers {
             }
         }
         return true;
+    }
+
+    public static double getTotalFromItems(String... items) {
+        try {
+            double total = 0.0;
+
+            for(int i=0; i<items.length; i++) {
+                if (items[i] != null) {
+                    Double item = Double.parseDouble(items[i]);
+                    total += item;
+                }
+            }
+
+            return total;
+        } catch (Exception e) {
+            return 0.0;
+        }
     }
 }

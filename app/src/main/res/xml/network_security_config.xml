@@ -8,6 +8,9 @@
         <domain includeSubdomains="true">192.168.110.97</domain>
         <domain includeSubdomains="true">192.168.130.137</domain>
         <domain includeSubdomains="true">192.168.30.118</domain>
+        <domain includeSubdomains="true">192.168.0.111</domain>
+        <domain includeSubdomains="true">192.168.0.100</domain>
+        <domain includeSubdomains="true">192.168.5.97</domain>
 
         <!-- DEPLOYMENT -->
         <domain includeSubdomains="true">192.168.100.10</domain>

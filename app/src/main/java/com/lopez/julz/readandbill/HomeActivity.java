@@ -26,6 +26,8 @@ import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
 import com.lopez.julz.readandbill.dao.Settings;
+import com.lopez.julz.readandbill.dao.Users;
+import com.lopez.julz.readandbill.dao.UsersDao;
 import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
 import com.lopez.julz.readandbill.objects.HomeMenu;
@@ -41,7 +43,7 @@ public class HomeActivity extends AppCompatActivity {
 
     public String userId;
 
-    public FloatingActionButton settingsBtn;
+    public FloatingActionButton settingsBtn, logout;
     public TextView bottomBarNotif;
 
     public AppDatabase db;
@@ -90,6 +92,7 @@ public class HomeActivity extends AppCompatActivity {
         menu_recyclerview.setLayoutManager(new GridLayoutManager(this, 2));
         settingsBtn = findViewById(R.id.settingsBtn);
         bottomBarNotif = findViewById(R.id.bottomBarNotif);
+        logout = findViewById(R.id.logout);
 
         addMenu();
 
@@ -97,6 +100,13 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+            }
+        });
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Logout().execute();
             }
         });
     }
@@ -147,6 +157,38 @@ public class HomeActivity extends AppCompatActivity {
 
             } else {
                 AlertHelpers.showMessageDialog(HomeActivity.this, "Settings Not Initialized", "Failed to load settings. Go to settings and set all necessary parameters to continue.");
+            }
+        }
+    }
+
+    public class Logout extends AsyncTask<Void, Void, Void> {
+
+        boolean isSuccessful = false;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                UsersDao usersDao = db.usersDao();
+                Users user = usersDao.getOneById(userId);
+                if (user != null) {
+                    user.setLoggedIn("NULL");
+                    usersDao.updateAll(user);
+                    isSuccessful = true;
+                } else {
+                    isSuccessful = false;
+                }
+            } catch (Exception e) {
+                Log.e("ERR_LGOUT", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+            if (isSuccessful) {
+                finish();
+                startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             }
         }
     }

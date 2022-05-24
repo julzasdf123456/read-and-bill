@@ -205,14 +205,14 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new FetchAccount().execute("next", currentDpr.getSequenceCode());
+                new FetchAccount().execute("next", currentDpr.getSequenceCode() != null ? (currentDpr.getSequenceCode().length() < 1 ? "001" : currentDpr.getSequenceCode()) : "001");
             }
         });
 
         prevBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new FetchAccount().execute("prev", currentDpr.getSequenceCode());
+                new FetchAccount().execute("prev", currentDpr.getSequenceCode() != null ? (currentDpr.getSequenceCode().length() < 1 ? "001" : currentDpr.getSequenceCode()) : "001");
             }
         });
 
@@ -390,7 +390,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             @Override
             public void onClick(View view) {
 //                print(currentBill, currentRate, currentDpr);
-                printViaEscPos(currentBill, currentRate, currentDpr);
+                printViaEscPos(currentBill, currentRate, currentDpr, currentReading);
             }
         });
 
@@ -656,6 +656,8 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
             readingId = ObjectHelpers.getTimeInMillis() + "-" + ObjectHelpers.generateRandomString();
             prevBtn.setEnabled(false);
             nextBtn.setEnabled(false);
+            billBtn.setEnabled(true);
+            takePhotoButton.setEnabled(true);
             presReading.setText("");
             fieldStatus.clearCheck();
             fieldStatus.setVisibility(View.GONE);
@@ -905,7 +907,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                  * PRINT BILL
                  */
 //                print(currentBill, currentRate, currentDpr);
-                printViaEscPos(currentBill, currentRate, currentDpr);
+                printViaEscPos(currentBill, currentRate, currentDpr, currentReading);
 
                 try {
                     TextLogger.appendLog(currentBill.getAccountNumber() + "\t" +
@@ -926,7 +928,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 /**
                  * PROCEED TO NEXT
                  */
-                new FetchAccount().execute("next", currentDpr.getSequenceCode());
+                new FetchAccount().execute("next", currentDpr.getSequenceCode() != null ? (currentDpr.getSequenceCode().length() < 1 ? "001" : currentDpr.getSequenceCode()) : "001");
             } else {
                 AlertHelpers.showMessageDialog(ReadingFormActivity.this, "ERROR", "An error occurred while performing the reading. \n" + errors);
             }
@@ -957,7 +959,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         cameraIntent.putExtra( MediaStore.EXTRA_FINISH_ON_COMPLETION, true);
         if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(cameraIntent, REQUEST_PICTURE_CAPTURE);
+//            startActivityForResult(cameraIntent, REQUEST_PICTURE_CAPTURE);
 
             File pictureFile = null;
             try {
@@ -1512,7 +1514,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
-    public void printViaEscPos(Bills bills, Rates rates, DownloadedPreviousReadings dpr) {
+    public void printViaEscPos(Bills bills, Rates rates, DownloadedPreviousReadings dpr, Readings readings) {
         try {
             if (mBluetoothAdapter == null) {
                 Toast.makeText(this, "No bluetooth adapter available", Toast.LENGTH_SHORT).show();
@@ -1523,83 +1525,86 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 //                    startActivityForResult(enableBluetooth, 0);
                     Toast.makeText(this, "Bluetooth is disabled!", Toast.LENGTH_SHORT).show();
                 } else {
-                    EscPosPrinter printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 28f, 32);
+                    EscPosPrinter printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 28f, 48);
+//                    Log.e("TEST", printer.getPrinterWidthMM() + " - " + printer.getPrinterDpi() + " - " + printer.getPrinterNbrCharactersPerLine());
                     printer.printFormattedText(
-                                    "[C]" + getResources().getString(R.string.company) + "\n" +
+                                    "[C]<font size='tall'>" + getResources().getString(R.string.company) + "</font>\n" +
                                             "[C]" + getResources().getString(R.string.companyAddress) + "\n" +
                                             "[C]" + getResources().getString(R.string.companyTin) + "\n" +
-                                            "[C]STATEMENT OF ACCOUNT\n" +
-                                            "[C]" + ObjectHelpers.formatShortDateWithDate(bills.getBillingDate()) + "\n" +
+                                            "[C]<b>STATEMENT OF ACCOUNT</b>\n" +
+                                            "[C]" + (readings != null ? ObjectHelpers.formatDetailedDate(readings.getReadingTimestamp()) : ObjectHelpers.formatDetailedDate(ObjectHelpers.getCurrentTimestamp())) + "\n" +
+                                            "[C]<barcode type='128' height='10'>" + bills.getAccountNumber() + "</barcode>\n" +
                                             "[L]\n" +
-                                            "[C]<barcode type='128' height='8'>" + bills.getAccountNumber() + "</barcode>\n" +
-                                            "[C]--------------------------------\n" +
-                                            "[L]\n" +
-                                            "[L]Acct No: " + bills.getAccountNumber() + "\n" +
-                                            "[L]" + dpr.getServiceAccountName() + "\n" +
+                                            "[L]<font size='tall'>Acct No: " + (dpr.getOldAccountNo() != null ? dpr.getOldAccountNo() : bills.getAccountNumber()) + "</font>\n" +
+                                            "[L]<font size='tall'>" + dpr.getServiceAccountName() + "</font>\n" +
                                             "[L]" + (dpr.getPurok() + ", " + dpr.getBarangayFull() + ", " + dpr.getTownFull()) + "\n" +
                                             "[L]Bill Mo: " + ObjectHelpers.formatShortDate(bills.getServicePeriod()) + "[R]Mult: " + bills.getMultiplier() + "\n" +
-                                            "[L]Meter No: " + (dpr.getMeterSerial() != null ? dpr.getMeterSerial() : '-') +
-                                            "[L]Prev.: " + ObjectHelpers.formatShortDateWithDate(dpr.getReadingTimestamp()) + "[R]KWH: " + dpr.getKwhUsed() + "\n" +
-                                            "[L]Pres.: " + ObjectHelpers.formatShortDateWithDate(bills.getBillingDate()) + "[R]KWH: " + bills.getPresentKwh() + "\n" +
-                                            "[L]KwH Used: " + bills.getKwhUsed() + "[R]Rate: " + ObjectHelpers.roundFour(Double.valueOf(bills.getEffectiveRate())) + "\n" +
-                                            "[L]Due Date: " + ObjectHelpers.formatShortDateWithDate(bills.getDueDate()) + "\n" +
-                                            "[L]Type: " + dpr.getAccountType() + "\n" +
-                                            "[L]M. Reader: " + (user != null ? user.getUsername() : '-') + "\n" +
-                                            "[L]Arrears: " + (dpr.getArrearsTotal() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsTotal())) : "0") + "\n" +
-                                            "[L]Termed Pmnts: " + (dpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsLedger())) : "0") + "\n" +
-                                            "[L]Unpaid Balance: " + (dpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getBalance())) : "0") + "\n" +
+                                            "[L]Meter No: " + (dpr.getMeterSerial() != null ? dpr.getMeterSerial() : '-') + "[R]Type: " + dpr.getAccountType() + "\n" +
+                                            "[L]<b>--READING DATE--</b>[R]<b>--READING--</b>[R]<b>--KWH USED--</b>\n" +
+                                            "[L]" + ObjectHelpers.getPreviousMonth(dpr.getReadingTimestamp()) + "[R] " + dpr.getKwhUsed() + "[R]<font size='tall'>" + bills.getKwhUsed() + "</font>\n" +
+                                            "[L]" + ObjectHelpers.formatNumericDate(bills.getBillingDate()) + "[R]" + bills.getPresentKwh() + "[R]\n" +
+                                            "[L]<b>DUE DATE: " + ObjectHelpers.formatShortDateWithDate(bills.getDueDate()) + "</b>[R]Rate: " + ObjectHelpers.roundFour(Double.valueOf(bills.getEffectiveRate())) + "\n" +
+                                            "[L]<b>DISCO DATE: " + ObjectHelpers.formatShortDateWithDate(ObjectHelpers.getDisconnection(bills.getDueDate())) + "</b>\n" +
+                                            "[L]<b>Arrears: " + (dpr.getArrearsTotal() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsTotal())) : "0") + "</b>\n" +
+                                            "[L]Termed Payments: " + (dpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsLedger())) : "0") + "[R]Unpaid Balance: " + (dpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getBalance())) : "0") + "\n" +
+                                            "[L]Meter Reader: " + (user != null ? user.getUsername() : '-') + "\n" +
                                             "[L]\n" +
                                             "[L]*[R]Rates[R]Amnt\n" +
-                                            "[C]--------------------------------\n" +
+                                            "[C]----------------------------------------\n" +
                                             "[L]GEN & TRANS REVENUES\n" +
-                                            "[L]Gen. Sys.[R]" + (rates.getGenerationSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getGenerationSystemCharge())) : "0.0000") + "[R]" + (bills.getGenerationSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getGenerationSystemCharge())) : "0.0") + "\n" +
-                                            "[L]Trans. Demand[R]" + (rates.getTransmissionDeliveryChargeKW() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionDeliveryChargeKW())) : "0.0000") + "[R]" + (bills.getTransmissionDeliveryChargeKW() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionDeliveryChargeKW())) : "0.0") + "\n" +
-                                            "[L]Trans. System[R]" + (rates.getTransmissionDeliveryChargeKWH() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionDeliveryChargeKWH())) : "0.0000") + "[R]" + (bills.getTransmissionDeliveryChargeKWH() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionDeliveryChargeKWH())) : "0.0") + "\n" +
-                                            "[L]System Loss[R]" + (rates.getSystemLossCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSystemLossCharge())) : "0.0000") + "[R]" + (bills.getSystemLossCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSystemLossCharge())) : "0.0") + "\n" +
-                                            "[L]OGA[R]" + (rates.getOtherGenerationRateAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherGenerationRateAdjustment())) : "0.0000") + "[R]" + (bills.getOtherGenerationRateAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherGenerationRateAdjustment())) : "0.0") + "\n" +
-                                            "[L]OTCA Demand[R]" + (rates.getOtherTransmissionCostAdjustmentKW() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherTransmissionCostAdjustmentKW())) : "0.0000") + "[R]" + (bills.getOtherTransmissionCostAdjustmentKW() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherTransmissionCostAdjustmentKW())) : "0.0") + "\n" +
-                                            "[L]OTCA System[R]" + (rates.getOtherTransmissionCostAdjustmentKWH() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherTransmissionCostAdjustmentKWH())) : "0.0000") + "[R]" + (bills.getOtherTransmissionCostAdjustmentKWH() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherTransmissionCostAdjustmentKWH())) : "0.0") + "\n" +
-                                            "[L]OSLA[R]" + (rates.getOtherSystemLossCostAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherSystemLossCostAdjustment())) : "0.0000") + "[R]" + (bills.getOtherSystemLossCostAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherSystemLossCostAdjustment())) : "0.0") + "\n" +
+                                            "[L]Generation Sys.[R]x[R]" + (rates.getGenerationSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getGenerationSystemCharge())) : "0.0000") + "/kWh[R]" + (bills.getGenerationSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getGenerationSystemCharge())) : "0.0") + "\n" +
+                                            "[L]Trans. Demand [R]x[R]" + (rates.getTransmissionDeliveryChargeKW() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionDeliveryChargeKW())) : "0.0000") + "/kWh[R]" + (bills.getTransmissionDeliveryChargeKW() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionDeliveryChargeKW())) : "0.0") + "\n" +
+                                            "[L]Trans. System [R]x[R]" + (rates.getTransmissionDeliveryChargeKWH() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionDeliveryChargeKWH())) : "0.0000") + "/kWh[R]" + (bills.getTransmissionDeliveryChargeKWH() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionDeliveryChargeKWH())) : "0.0") + "\n" +
+                                            "[L]System Loss [R]x[R]" + (rates.getSystemLossCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSystemLossCharge())) : "0.0000") + "/kWh[R]" + (bills.getSystemLossCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSystemLossCharge())) : "0.0") + "\n" +
+                                            "[L]OGA [R]x[R]" + (rates.getOtherGenerationRateAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherGenerationRateAdjustment())) : "0.0000") + "/kWh[R]" + (bills.getOtherGenerationRateAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherGenerationRateAdjustment())) : "0.0") + "\n" +
+                                            "[L]OTCA Demand [R]x[R]" + (rates.getOtherTransmissionCostAdjustmentKW() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherTransmissionCostAdjustmentKW())) : "0.0000") + "/kWh[R]" + (bills.getOtherTransmissionCostAdjustmentKW() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherTransmissionCostAdjustmentKW())) : "0.0") + "\n" +
+                                            "[L]OTCA System [R]x[R]" + (rates.getOtherTransmissionCostAdjustmentKWH() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherTransmissionCostAdjustmentKWH())) : "0.0000") + "/kWh[R]" + (bills.getOtherTransmissionCostAdjustmentKWH() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherTransmissionCostAdjustmentKWH())) : "0.0") + "\n" +
+                                            "[L]OSLA [R]x[R]" + (rates.getOtherSystemLossCostAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherSystemLossCostAdjustment())) : "0.0000") + "/kWh[R]" + (bills.getOtherSystemLossCostAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherSystemLossCostAdjustment())) : "0.0") + "\n" +
+                                            "[L][R][R]SUB-TOTAL [R]" + ObjectHelpers.roundTwo(ObjectHelpers.getTotalFromItems(bills.getGenerationSystemCharge(), bills.getTransmissionDeliveryChargeKW(), bills.getTransmissionDeliveryChargeKWH(), bills.getSystemLossCharge(), bills.getOtherGenerationRateAdjustment(), bills.getOtherTransmissionCostAdjustmentKW(), bills.getOtherTransmissionCostAdjustmentKWH(), bills.getOtherSystemLossCostAdjustment())) + "\n" +
                                             "[L]DISTRIBUTION REVENUES" + "\n" +
-                                            "[L]Dist. Demand[R]" + (rates.getDistributionDemandCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionDemandCharge())) : "0.0000") + "[R]" + (bills.getDistributionDemandCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionDemandCharge())) : "0.0") + "\n" +
-                                            "[L]Dist. System[R]" + (rates.getDistributionSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionSystemCharge())) : "0.0000") + "[R]" + (bills.getDistributionSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionSystemCharge())) : "0.0") + "\n" +
-                                            "[L]Sup. Ret. Cust.[R]" + (rates.getSupplyRetailCustomerCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSupplyRetailCustomerCharge())) : "0.0000") + "[R]" + (bills.getSupplyRetailCustomerCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSupplyRetailCustomerCharge())) : "0.0") + "\n" +
-                                            "[L]Supply System[R]" + (rates.getSupplySystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSupplySystemCharge())) : "0.0000") + "[R]" + (bills.getSupplySystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSupplySystemCharge())) : "0.0") + "\n" +
-                                            "[L]Metering Ret.[R]" + (rates.getMeteringRetailCustomerCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMeteringRetailCustomerCharge())) : "0.0000") + "[R]" + (bills.getMeteringRetailCustomerCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMeteringRetailCustomerCharge())) : "0.0") + "\n" +
-                                            "[L]Metering Sys.[R]" + (rates.getMeteringSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMeteringSystemCharge())) : "0.0000") + "[R]" + (bills.getMeteringSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMeteringSystemCharge())) : "0.0") + "\n" +
-                                            "[L]RFSC[R]" + (rates.getRFSC() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getRFSC())) : "0.0") + "[R]" + (bills.getRFSC() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getRFSC())) : "0.0") + "\n" +
+                                            "[L]Dist. Demand [R]x[R]" + (rates.getDistributionDemandCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionDemandCharge())) : "0.0000") + "/kWh[R]" + (bills.getDistributionDemandCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionDemandCharge())) : "0.0") + "\n" +
+                                            "[L]Dist. System [R]x[R]" + (rates.getDistributionSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionSystemCharge())) : "0.0000") + "/kWh[R]" + (bills.getDistributionSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionSystemCharge())) : "0.0") + "\n" +
+                                            "[L]Sup. Ret. Cust. [R]x[R]" + (rates.getSupplyRetailCustomerCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSupplyRetailCustomerCharge())) : "0.0000") + "/kWh[R]" + (bills.getSupplyRetailCustomerCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSupplyRetailCustomerCharge())) : "0.0") + "\n" +
+                                            "[L]Supply System [R]x[R]" + (rates.getSupplySystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSupplySystemCharge())) : "0.0000") + "/kWh[R]" + (bills.getSupplySystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSupplySystemCharge())) : "0.0") + "\n" +
+                                            "[L]Metering Ret. [R]x[R]" + (rates.getMeteringRetailCustomerCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMeteringRetailCustomerCharge())) : "0.0000") + "/kWh[R]" + (bills.getMeteringRetailCustomerCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMeteringRetailCustomerCharge())) : "0.0") + "\n" +
+                                            "[L]Metering Sys. [R]x[R]" + (rates.getMeteringSystemCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMeteringSystemCharge())) : "0.0000") + "/kWh[R]" + (bills.getMeteringSystemCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMeteringSystemCharge())) : "0.0") + "\n" +
+                                            "[L]RFSC [R]x[R]" + (rates.getRFSC() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getRFSC())) : "0.0") + "/kWh[R]" + (bills.getRFSC() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getRFSC())) : "0.0") + "\n" +
+                                            "[L][R][R]SUB-TOTAL [R]" + ObjectHelpers.roundTwo(ObjectHelpers.getTotalFromItems(bills.getDistributionDemandCharge(), bills.getDistributionSystemCharge(), bills.getSupplyRetailCustomerCharge(), bills.getSupplySystemCharge(), bills.getMeteringRetailCustomerCharge(), bills.getMeteringSystemCharge(), bills.getRFSC())) + "\n" +
                                             "[L]UNIVERSAL CHARGES" + "\n" +
-                                            "[L]Miss. Elec.[R]" + (rates.getMissionaryElectrificationCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMissionaryElectrificationCharge())) : "0.0000") + "[R]" + (bills.getMissionaryElectrificationCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMissionaryElectrificationCharge())) : "0.0") + "\n" +
-                                            "[L]Env. Chrg.[R]" + (rates.getEnvironmentalCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getEnvironmentalCharge())) : "0.0000") + "[R]" + (bills.getEnvironmentalCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getEnvironmentalCharge())) : "0.0") + "\n" +
-                                            "[L]Stranded Cont.[R]" + (rates.getStrandedContractCosts() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getStrandedContractCosts())) : "0.0000") + "[R]" + (bills.getStrandedContractCosts() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getStrandedContractCosts())) : "0.0") + "\n" +
-                                            "[L]NPC Str. Debt[R]" + (rates.getNPCStrandedDebt() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getNPCStrandedDebt())) : "0.0000") + "[R]" + (bills.getNPCStrandedDebt() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getNPCStrandedDebt())) : "0.0") + "\n" +
-                                            "[L]FIT All.[R]" + (rates.getFeedInTariffAllowance() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getFeedInTariffAllowance())) : "0.0000") + "[R]" + (bills.getFeedInTariffAllowance() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getFeedInTariffAllowance())) : "0.0") + "\n" +
-                                            "[L]REDCI[R]" + (rates.getMissionaryElectrificationREDCI() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMissionaryElectrificationREDCI())) : "0.0000") + "[R]" + (bills.getMissionaryElectrificationREDCI() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMissionaryElectrificationREDCI())) : "0.0") + "\n" +
+                                            "[L]Missionary Elec. [R]x[R]" + (rates.getMissionaryElectrificationCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMissionaryElectrificationCharge())) : "0.0000") + "/kWh[R]" + (bills.getMissionaryElectrificationCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMissionaryElectrificationCharge())) : "0.0") + "\n" +
+                                            "[L]Environmental [R]x[R]" + (rates.getEnvironmentalCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getEnvironmentalCharge())) : "0.0000") + "/kWh[R]" + (bills.getEnvironmentalCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getEnvironmentalCharge())) : "0.0") + "\n" +
+                                            "[L]Stranded Cont. [R]x[R]" + (rates.getStrandedContractCosts() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getStrandedContractCosts())) : "0.0000") + "/kWh[R]" + (bills.getStrandedContractCosts() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getStrandedContractCosts())) : "0.0") + "\n" +
+                                            "[L]NPC Str. Debt [R]x[R]" + (rates.getNPCStrandedDebt() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getNPCStrandedDebt())) : "0.0000") + "/kWh[R]" + (bills.getNPCStrandedDebt() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getNPCStrandedDebt())) : "0.0") + "\n" +
+                                            "[L]FIT All. [R]x[R]" + (rates.getFeedInTariffAllowance() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getFeedInTariffAllowance())) : "0.0000") + "/kWh[R]" + (bills.getFeedInTariffAllowance() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getFeedInTariffAllowance())) : "0.0") + "\n" +
+                                            "[L]REDCI [R]x[R]" + (rates.getMissionaryElectrificationREDCI() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getMissionaryElectrificationREDCI())) : "0.0000") + "/kWh[R]" + (bills.getMissionaryElectrificationREDCI() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getMissionaryElectrificationREDCI())) : "0.0") + "\n" +
+                                            "[L][R][R]SUB-TOTAL [R]" + ObjectHelpers.roundTwo(ObjectHelpers.getTotalFromItems(bills.getMissionaryElectrificationCharge(), bills.getEnvironmentalCharge(), bills.getStrandedContractCosts(), bills.getNPCStrandedDebt(), bills.getFeedInTariffAllowance(), bills.getMissionaryElectrificationREDCI())) + "\n" +
                                             "[L]OTHERS" + "\n" +
-                                            "[L]Lifeline Rate[R]" + (rates.getLifelineRate() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getLifelineRate())) : "0.0000") + "[R]" + (bills.getLifelineRate() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getLifelineRate())) : "0.0") + "\n" +
-                                            "[L]ICC Sub.[R]" + (rates.getInterClassCrossSubsidyCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getInterClassCrossSubsidyCharge())) : "0.0000") + "[R]" + (bills.getInterClassCrossSubsidyCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getInterClassCrossSubsidyCharge())) : "0.0") + "\n" +
-                                            "[L]PPA Refund[R]" + (rates.getPPARefund() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getPPARefund())) : "0.0000") + "[R]" + (bills.getPPARefund() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getPPARefund())) : "0.0") + "\n" +
-                                            "[L]SC Sub.[R]" + (rates.getSeniorCitizenSubsidy() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSeniorCitizenSubsidy())) : "0.0000") + "[R]" + (bills.getSeniorCitizenSubsidy() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSeniorCitizenSubsidy())) : "0.0") + "\n" +
-                                            "[L]OLRA[R]" + (rates.getOtherLifelineRateCostAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherLifelineRateCostAdjustment())) : "0.0000") + "[R]" + (bills.getOtherLifelineRateCostAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherLifelineRateCostAdjustment())) : "0.0") + "\n" +
-                                            "[L]SC Disc./Ajd.[R]" + (rates.getSeniorCitizenDiscountAndSubsidyAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSeniorCitizenDiscountAndSubsidyAdjustment())) : "0.0000") + "[R]" + (bills.getSeniorCitizenDiscountAndSubsidyAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSeniorCitizenDiscountAndSubsidyAdjustment())) : "0.0") + "\n" +
+                                            "[L]Lifeline Rate [R]x[R]" + (rates.getLifelineRate() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getLifelineRate())) : "0.0000") + "/kWh[R]" + (bills.getLifelineRate() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getLifelineRate())) : "0.0") + "\n" +
+                                            "[L]ICC Subsidy [R]x[R]" + (rates.getInterClassCrossSubsidyCharge() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getInterClassCrossSubsidyCharge())) : "0.0000") + "/kWh[R]" + (bills.getInterClassCrossSubsidyCharge() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getInterClassCrossSubsidyCharge())) : "0.0") + "\n" +
+                                            "[L]PPA Refund [R]x[R]" + (rates.getPPARefund() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getPPARefund())) : "0.0000") + "/kWh[R]" + (bills.getPPARefund() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getPPARefund())) : "0.0") + "\n" +
+                                            "[L]Senior Ctzn. Sub. [R]x[R]" + (rates.getSeniorCitizenSubsidy() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSeniorCitizenSubsidy())) : "0.0000") + "/kWh[R]" + (bills.getSeniorCitizenSubsidy() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSeniorCitizenSubsidy())) : "0.0") + "\n" +
+                                            "[L]OLRA [R]x[R]" + (rates.getOtherLifelineRateCostAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getOtherLifelineRateCostAdjustment())) : "0.0000") + "/kWh[R]" + (bills.getOtherLifelineRateCostAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getOtherLifelineRateCostAdjustment())) : "0.0") + "\n" +
+                                            "[L]SC Disc./Ajd. [R]x[R]" + (rates.getSeniorCitizenDiscountAndSubsidyAdjustment() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSeniorCitizenDiscountAndSubsidyAdjustment())) : "0.0000") + "/kWh[R]" + (bills.getSeniorCitizenDiscountAndSubsidyAdjustment() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSeniorCitizenDiscountAndSubsidyAdjustment())) : "0.0") + "\n" +
+                                            "[L][R][R]SUB-TOTAL [R]" + ObjectHelpers.roundTwo(ObjectHelpers.getTotalFromItems(bills.getLifelineRate(), bills.getInterClassCrossSubsidyCharge(), bills.getPPARefund(), bills.getSeniorCitizenSubsidy(), bills.getOtherLifelineRateCostAdjustment(), bills.getSeniorCitizenDiscountAndSubsidyAdjustment())) + "\n" +
                                             "[L]TAXES" + "\n" +
-                                            "[L]Gen. VAT[R]" + (rates.getGenerationVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getGenerationVAT())) : "0.0000") + "[R]" + (bills.getGenerationVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getGenerationVAT())) : "0.0") + "\n" +
-                                            "[L]Trans. VAT[R]" + (rates.getTransmissionVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionVAT())) : "0.0000") + "[R]" + (bills.getTransmissionVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionVAT())) : "0.0") + "\n" +
-                                            "[L]Dist. VAT[R]" + (rates.getDistributionVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionVAT())) : "0.0000") + "[R]" + (bills.getDistributionVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionVAT())) : "0.0") + "\n" +
-                                            "[L]Sys. Loss VAT[R]" + (rates.getSystemLossVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSystemLossVAT())) : "0.0000") + "[R]" + (bills.getSystemLossVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSystemLossVAT())) : "0.0") + "\n" +
-                                            "[L]Franchise Tax[R]" + (rates.getFranchiseTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getFranchiseTax())) : "0.0000") + "[R]" + (bills.getFranchiseTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getFranchiseTax())) : "0.0") + "\n" +
-                                            "[L]Business Tax[R]" + (rates.getBusinessTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getBusinessTax())) : "0.0000") + "[R]" + (bills.getBusinessTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getBusinessTax())) : "0.0") + "\n" +
-                                            "[L]RP Tax[R]" + (rates.getRealPropertyTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getRealPropertyTax())) : "0.0000") + "[R]" + (bills.getRealPropertyTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getRealPropertyTax())) : "0.0") + "\n" +
+                                            "[L]Generation VAT [R]x[R]" + (rates.getGenerationVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getGenerationVAT())) : "0.0000") + "/kWh[R]" + (bills.getGenerationVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getGenerationVAT())) : "0.0") + "\n" +
+                                            "[L]Transmission VAT [R]x[R]" + (rates.getTransmissionVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getTransmissionVAT())) : "0.0000") + "/kWh[R]" + (bills.getTransmissionVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getTransmissionVAT())) : "0.0") + "\n" +
+                                            "[L]Distribution VAT [R]x[R]" + (rates.getDistributionVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getDistributionVAT())) : "0.0000") + "/kWh[R]" + (bills.getDistributionVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getDistributionVAT())) : "0.0") + "\n" +
+                                            "[L]System Loss VAT [R]x[R]" + (rates.getSystemLossVAT() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getSystemLossVAT())) : "0.0000") + "/kWh[R]" + (bills.getSystemLossVAT() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getSystemLossVAT())) : "0.0") + "\n" +
+                                            "[L]Franchise Tax [R]x[R]" + (rates.getFranchiseTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getFranchiseTax())) : "0.0000") + "/kWh[R]" + (bills.getFranchiseTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getFranchiseTax())) : "0.0") + "\n" +
+                                            "[L]Business Tax [R]x[R]" + (rates.getBusinessTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getBusinessTax())) : "0.0000") + "/kWh[R]" + (bills.getBusinessTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getBusinessTax())) : "0.0") + "\n" +
+                                            "[L]RP Tax [R]" + (rates.getRealPropertyTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getRealPropertyTax())) : "0.0000") + "/kWh[R]" + (bills.getRealPropertyTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getRealPropertyTax())) : "0.0") + "\n" +
+                                            "[L][R][R]SUB-TOTAL [R]" + ObjectHelpers.roundTwo(ObjectHelpers.getTotalFromItems(bills.getGenerationVAT(), bills.getTransmissionVAT(), bills.getDistributionVAT(), bills.getSystemLossVAT(), bills.getFranchiseTax(), bills.getBusinessTax(), bills.getRealPropertyTax())) + "\n" +
                                             "[R]\n" +
-                                            "[C]--------------------------------\n" +
+                                            "[C]----------------------------------------\n" +
                                             "[C]Amount Due\n" +
-                                            "[C]<font size='big'>P " + ObjectHelpers.roundTwo(Double.valueOf(bills.getNetAmount())) + "</font>\n" +
+                                            "[C]<font size='big'><b>P " + ObjectHelpers.roundTwo(Double.valueOf(bills.getNetAmount())) + "</b></font>\n" +
                                             "[R]\n" +
                                             "[C]NOTE: Please pay this bill within nine (9) days upon receipt hereof to avoid disconnection of your electric services.\n" +
                                             "[C]Rates are net of refund per ERC order 2012-018CF.\n" +
                                             "[C]*PLS PRESENT THIS STATEMENT UPON PAYMENT*\n" +
                                             "[L]\n" +
-                                            "[C]--------------------------------\n" +
+                                            "[C]----------------------------------------\n" +
                                             "[L]Date: " + ObjectHelpers.getCurrentDate() + " " + ObjectHelpers.getCurrentTime() + "\n" +
                                             "[L]\n" +
                                             "[L]<font size='tall'>Acct No: " + bills.getAccountNumber() + "</font>\n" +
@@ -1609,12 +1614,12 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                             "[L]KwH Used: " + bills.getKwhUsed() + "\n" +
                                             "[L]Due Date: " + ObjectHelpers.formatShortDateWithDate(bills.getDueDate()) + "\n" +
                                             "[L]Type: " + dpr.getAccountType() + "\n" +
-                                            "[L]M. Reader: " + (user != null ? user.getUsername() : '-') + "\n" +
+                                            "[L]Meter Reader: " + (user != null ? user.getUsername() : '-') + "\n" +
                                             "[L]Arrears: " + (dpr.getArrearsTotal() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsTotal())) : "0") + "\n" +
-                                            "[L]Termed Pmnts: " + (dpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsLedger())) : "0") + "\n" +
-                                            "[L]Unpaid Balance: " + (dpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getBalance())) : "0") + "\n\n" +
-                                            "[C]<qrcode size='20'>" + bills.getAccountNumber() + "-*-" + bills.getKwhUsed() + "</qrcode>\n" +
-                                            "[L]\n"
+                                            "[L]Termed Payments: " + (dpr.getArrearsLedger() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getArrearsLedger())) : "0") + "\n" +
+                                            "[L]Unpaid Balance: " + (dpr.getBalance() != null ? ObjectHelpers.roundTwo(Double.valueOf(dpr.getBalance())) : "0") + "\n\n"
+//                                            "[C]<qrcode size='20'>" + bills.getAccountNumber() + "-*-" + bills.getKwhUsed() + "</qrcode>\n" +
+//                                            "[L]\n"
                             );
 
                     printer.disconnectPrinter();

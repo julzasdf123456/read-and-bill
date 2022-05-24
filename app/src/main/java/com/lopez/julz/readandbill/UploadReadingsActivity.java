@@ -169,6 +169,17 @@ public class UploadReadingsActivity extends AppCompatActivity {
                                 uploadStatusText.setText("Uploading Bills...");
                                 uploadBills();
                             }
+                        } else {
+                            try {
+                                Log.e("ERR_UPLD_READING", response.raw() + "\n" + response.errorBody().string() );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Reading Upload Failed", response.raw() + "\n" + response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
 
@@ -282,6 +293,7 @@ public class UploadReadingsActivity extends AppCompatActivity {
                                     progress = 1;
                                     uploadProgress.setProgress(0);
                                     uploadStatusText.setText("Uploading Complete");
+                                    AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Upload Complete!", "All data and files uploaded!");
                                 }
                             } else {
                                 try {
@@ -311,12 +323,14 @@ public class UploadReadingsActivity extends AppCompatActivity {
                         progress = 1;
                         uploadProgress.setProgress(0);
                         uploadStatusText.setText("Uploading Complete");
+                        AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Upload Complete!", "All data and files uploaded!");
                     }
                 }
             } else {
                 progress = 1;
                 uploadProgress.setProgress(0);
                 uploadStatusText.setText("Uploading Complete");
+                AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Upload Complete!", "All data and files uploaded!");
             }
 
         } catch (Exception e) {

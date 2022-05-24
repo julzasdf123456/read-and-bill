@@ -2,12 +2,12 @@
     <string name="app_name">Meter Reading App MR</string>
     <string name="mapbox_access_token">pk.eyJ1IjoianVsemxvcGV6IiwiYSI6ImNqZzJ5cWdsMjJid3Ayd2xsaHcwdGhheW8ifQ.BcTcaOXmXNLxdO3wfXaf5A</string>
     <string name="mapbox_style">mapbox://styles/julzlopez/ckavvidmh61bt1iqp2n1ilgec</string>
-    <!--    <string name="company">NORTHERN NEGROS \nELECTRIC COOPERATIVE, INC.</string>-->
-    <!--    <string name="companyAbrev">NONECO</string>-->
-    <!--    <string name="companyAddress">Manapla, Negros Occidenatal</string>-->
-    <!--    <string name="companyTin">TIN: 0652-6521-352</string>-->
-    <string name="company">BOHOL I ELECTRIC\nCOOPERATIVE, INC.</string>
-    <string name="companyAbrev">NONECO</string>
-    <string name="companyAddress">Cabulijan, Tubigon, Bohol</string>
-    <string name="companyTin">TIN: 0652-6521-352</string>
+        <string name="company">NORTHERN NEGROS ELECTRIC COOPERATIVE, INC.</string>
+        <string name="companyAbrev">NONECO</string>
+        <string name="companyAddress">Manapla, Negros Occidenatal</string>
+        <string name="companyTin">TIN: 550-001-005-053-VAT</string>
+<!--    <string name="company">BOHOL I ELECTRIC\nCOOPERATIVE, INC.</string>-->
+<!--    <string name="companyAbrev">NONECO</string>-->
+<!--    <string name="companyAddress">Cabulijan, Tubigon, Bohol</string>-->
+<!--    <string name="companyTin">TIN: 0652-6521-352</string>-->
 </resources>

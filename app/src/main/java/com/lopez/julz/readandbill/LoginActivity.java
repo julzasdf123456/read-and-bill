@@ -121,54 +121,7 @@ public class LoginActivity extends AppCompatActivity{
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
 
-        new CommenceAutoLogin().execute();
 
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-                // CHECK MOBILE DATA
-                boolean mobileDataEnabled = false;
-                try {
-                    Class cmClass = Class.forName(connManager.getClass().getName());
-                    Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
-                    method.setAccessible(true); // Make the method callable
-                    // get the setting for "mobile data"
-                    mobileDataEnabled = (Boolean)method.invoke(connManager);
-                } catch (Exception e) {
-                    // Some problem accessible private API
-                    // TODO do whatever error handling you want here
-                }
-
-                if (mWifi.isConnected()) {
-                    // PERFORM ONLINE LOGIN USING WIFI
-                    if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
-                        Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
-                    } else {
-                        login();
-                    }
-                } else {
-                    if (mobileDataEnabled) {
-                        // PERFORM ONLINE LOGIN USING MOBILE DATA
-                        if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
-                            Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
-                        } else {
-                            login();
-                        }
-                    } else {
-                        // PERFORM OFFLINE LOGIN
-                        if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
-                            Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
-                        } else {
-                            new LoginOffline().execute(username.getText().toString(), password.getText().toString());
-                        }
-                    }
-
-                }
-            }
-        });
 
         settingsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,8 +186,12 @@ public class LoginActivity extends AppCompatActivity{
             Users existing = usersDao.getOne(strings[1], strings[2]);
 
             if (existing == null) {
-                Users users = new Users(strings[0], strings[1], strings[2]);
+                Users users = new Users(strings[0], strings[1], strings[2], "YES");
+                users.setLoggedIn("YES");
                 usersDao.insertAll(users);
+            } else {
+                existing.setLoggedIn("YES");
+                usersDao.updateAll(existing);
             }
 
             return null;
@@ -245,6 +202,7 @@ public class LoginActivity extends AppCompatActivity{
 
         boolean doesUserExists = false;
         String userid = "";
+        String usernameT, passwordT;
 
         @Override
         protected Void doInBackground(String... strings) {
@@ -256,6 +214,8 @@ public class LoginActivity extends AppCompatActivity{
             } else {
                 doesUserExists = true;
                 userid = existing.getId();
+                usernameT = existing.getUsername();
+                passwordT = existing.getPassword();
             }
             return null;
         }
@@ -265,6 +225,7 @@ public class LoginActivity extends AppCompatActivity{
             super.onPostExecute(unused);
 
             if (doesUserExists) {
+                new SaveUser().execute(userid, usernameT, passwordT);
                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                 intent.putExtra("USERID", userid);
                 startActivity(intent);
@@ -272,14 +233,6 @@ public class LoginActivity extends AppCompatActivity{
             } else {
                 Toast.makeText(LoginActivity.this, "User not found on this device!", Toast.LENGTH_LONG).show();
             }
-        }
-    }
-
-    public void checkPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(LoginActivity.this, permission) == PackageManager.PERMISSION_DENIED) {             // Requesting the permission
-            ActivityCompat.requestPermissions(LoginActivity.this, new String[] { permission }, requestCode);
-        } else {
-
         }
     }
 
@@ -301,6 +254,8 @@ public class LoginActivity extends AppCompatActivity{
             if (settings != null) {
                 retrofitBuilder = new RetrofitBuilder(settings.getDefaultServer());
                 requestPlaceHolder = retrofitBuilder.getRetrofit().create(RequestPlaceHolder.class);
+
+                new CommenceAutoLogin().execute();
             } else {
                 startActivity(new Intent(LoginActivity.this, SettingsActivity.class));
             }
@@ -311,6 +266,7 @@ public class LoginActivity extends AppCompatActivity{
 
         boolean doesUserExists = false;
         String userid = "";
+        String usernameT, passwordT;
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -321,8 +277,15 @@ public class LoginActivity extends AppCompatActivity{
                 if (existing == null) {
                     doesUserExists = false;
                 } else {
-                    doesUserExists = true;
-                    userid = existing.getId();
+                    if (existing.getLoggedIn() != null && existing.getLoggedIn().equals("YES")) {
+                        doesUserExists = true;
+                        userid = existing.getId();
+                        usernameT = existing.getUsername();
+                        passwordT = existing.getPassword();
+                    } else {
+                        doesUserExists = false;
+                    }
+
                 }
             } catch (Exception e) {
                 Log.e("ERR_AUTO_LGN", e.getMessage());
@@ -338,6 +301,53 @@ public class LoginActivity extends AppCompatActivity{
                 intent.putExtra("USERID", userid);
                 startActivity(intent);
                 finish();
+            } else {
+                login.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+                        // CHECK MOBILE DATA
+                        boolean mobileDataEnabled = false;
+                        try {
+                            Class cmClass = Class.forName(connManager.getClass().getName());
+                            Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
+                            method.setAccessible(true); // Make the method callable
+                            // get the setting for "mobile data"
+                            mobileDataEnabled = (Boolean)method.invoke(connManager);
+                        } catch (Exception e) {
+                            // Some problem accessible private API
+                            // TODO do whatever error handling you want here
+                        }
+
+                        if (mWifi.isConnected()) {
+                            // PERFORM ONLINE LOGIN USING WIFI
+                            if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
+                                Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
+                            } else {
+                                login();
+                            }
+                        } else {
+                            if (mobileDataEnabled) {
+                                // PERFORM ONLINE LOGIN USING MOBILE DATA
+                                if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
+                                    Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
+                                } else {
+                                    login();
+                                }
+                            } else {
+                                // PERFORM OFFLINE LOGIN
+                                if (username.getText().equals("") | null == username.getText() | password.getText().equals("") | null == password.getText()) {
+                                    Snackbar.make(username, "Please fill in the fields to login", Snackbar.LENGTH_LONG).show();
+                                } else {
+                                    new LoginOffline().execute(username.getText().toString(), password.getText().toString());
+                                }
+                            }
+
+                        }
+                    }
+                });
             }
         }
     }

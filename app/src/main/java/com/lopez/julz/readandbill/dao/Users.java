@@ -17,6 +17,9 @@ public class Users {
     @ColumnInfo (name = "Password")
     private String Password;
 
+    @ColumnInfo (name = "LoggedIn")
+    private String LoggedIn;
+
     public Users() {
     }
 
@@ -24,6 +27,13 @@ public class Users {
         this.id = id;
         Username = username;
         Password = password;
+    }
+
+    public Users(@NonNull String id, String username, String password, String loggedIn) {
+        this.id = id;
+        Username = username;
+        Password = password;
+        LoggedIn = loggedIn;
     }
 
     @NonNull
@@ -49,6 +59,14 @@ public class Users {
 
     public void setPassword(String password) {
         Password = password;
+    }
+
+    public String getLoggedIn() {
+        return LoggedIn;
+    }
+
+    public void setLoggedIn(String loggedIn) {
+        LoggedIn = loggedIn;
     }
 }
 
