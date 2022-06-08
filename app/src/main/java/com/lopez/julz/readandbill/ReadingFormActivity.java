@@ -259,7 +259,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                             new ReadAndBill().execute(reading);
                         } else {
                             String prevKwh = currentDpr.getKwhUsed() != null ? currentDpr.getKwhUsed() : "0";
-                            if (kwhConsumed > (Double.valueOf(prevKwh) * 2)) {
+                            if (kwhConsumed > (Double.valueOf(prevKwh) * 2) && Double.valueOf(prevKwh) > 0) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
                                 builder.setTitle("WARNING")
                                         .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo(((kwhConsumed / Double.valueOf(prevKwh)) * 100)) + "%. Do you wish to proceed?")
