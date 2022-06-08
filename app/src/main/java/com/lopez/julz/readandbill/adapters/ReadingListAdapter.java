@@ -1,20 +1,27 @@
 package com.lopez.julz.readandbill.adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import com.google.android.material.card.MaterialCardView;
 import com.lopez.julz.readandbill.R;
 import com.lopez.julz.readandbill.ReadingConsoleActivity;
 import com.lopez.julz.readandbill.ReadingListViewActivity;
+import com.lopez.julz.readandbill.dao.AppDatabase;
 import com.lopez.julz.readandbill.dao.ReadingSchedules;
 import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
@@ -53,7 +60,34 @@ public class ReadingListAdapter extends RecyclerView.Adapter<ReadingListAdapter.
             holder.parent.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    AlertHelpers.showMessageDialog(context, "Prohibited", "You need to finish reading the last reading schedules first before you can proceed to this schedule.");
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                    EditText code = new EditText(context);
+                    code.setHint("Enter Code Here");
+
+                    builder.setTitle("Reading Schedule Locked")
+                            .setMessage("You need to finish the previous 2 days of your reading schedule before proceeding to this one. To unlock this, input the code provided by your DATA ADMIN below.")
+                            .setView(code)
+                            .setPositiveButton("PROCEED", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    String idCode = readingSchedule.getId().split("-")[0];
+                                    if (idCode != null && idCode.equals(code.getText().toString())) {
+                                        new UpdateScheduleUnclock().execute(readingSchedule);
+                                    } else {
+                                        AlertHelpers.showMessageDialog(context, "Invalid Code", "Provide the code that your Data Admin has given you to continue.");
+                                    }
+                                }
+                            })
+                            .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            });
+
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
             });
         } else {
@@ -88,6 +122,44 @@ public class ReadingListAdapter extends RecyclerView.Adapter<ReadingListAdapter.
             area = itemView.findViewById(R.id.area);
             billingMonth = itemView.findViewById(R.id.billingMonth);
             scheduledDate = itemView.findViewById(R.id.scheduledDate);
+        }
+    }
+
+    public class UpdateScheduleUnclock extends AsyncTask<ReadingSchedules, Void, Void> {
+
+        AppDatabase db;
+        ReadingSchedules rs;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            db = Room.databaseBuilder(context, AppDatabase.class, ObjectHelpers.dbName()).fallbackToDestructiveMigration().build();
+        }
+
+        @Override
+        protected Void doInBackground(ReadingSchedules... readingSchedules) {
+            try {
+                if (readingSchedules != null) {
+                    rs = readingSchedules[0];
+                    rs.setDisabled("Unlocked");
+                    db.readingSchedulesDao().updateAll(rs);
+                }
+            } catch (Exception e) {
+                Log.e("ERR_UPDT_UNLCK_SCHD", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+
+            Intent intent = new Intent(context, ReadingListViewActivity.class);
+            intent.putExtra("USERID", userId);
+            intent.putExtra("AREACODE", rs.getAreaCode());
+            intent.putExtra("GROUPCODE", rs.getGroupCode());
+            intent.putExtra("SERVICEPERIOD", rs.getServicePeriod());
+            context.startActivity(intent);
         }
     }
 }

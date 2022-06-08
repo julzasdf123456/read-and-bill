@@ -870,7 +870,8 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                         currentDpr.setStatus("READ");
                         db.downloadedPreviousReadingsDao().updateAll(currentDpr);
 
-                        if (currentDpr.getAccountStatus() != null && currentDpr.getAccountStatus().equals("DISCONNECTED")) {
+                        /** READ ONLY **/
+                        if ((currentDpr.getAccountStatus() != null && currentDpr.getAccountStatus().equals("DISCONNECTED")) || currentDpr.getChangeMeterAdditionalKwh() != null) {
 
                         } else {
                             /** PERFORM BILLING **/

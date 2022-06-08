@@ -46,7 +46,7 @@ public interface RequestPlaceHolder {
     Call<List<ReadingSchedules>> getUndownloadedSchedules(@Query("MeterReaderId") String MeterReaderId);
 
     @GET("download-accounts")
-    Call<List<DownloadedPreviousReadings>> downloadAccounts(@Query("AreaCode") String AreaCode, @Query("GroupCode") String GroupCode, @Query("ServicePeriod") String ServicePeriod);
+    Call<List<DownloadedPreviousReadings>> downloadAccounts(@Query("AreaCode") String AreaCode, @Query("GroupCode") String GroupCode, @Query("ServicePeriod") String ServicePeriod, @Query("MeterReader") String MeterReader);
 
     @GET("download-rates")
     Call<List<Rates>> downloadRates(@Query("ServicePeriod") String ServicePeriod);

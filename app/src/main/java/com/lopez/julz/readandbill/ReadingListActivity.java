@@ -124,7 +124,11 @@ public class ReadingListActivity extends AppCompatActivity {
                     ReadingSchedules rs = readingSchedulesList.get(x);
                     if (x > 1) { // THIRD RANK IN THE READING LIST (THIRD DAY)
                         // UPDATE TO DISABLE
-                        rs.setDisabled("Yes");
+                        if (rs.getDisabled() != null && rs.getDisabled()=="Yes") {
+
+                        } else {
+                            rs.setDisabled("Yes");
+                        }
                     } else {
                         // UPDATE TO ENABLE
                         rs.setDisabled(null);

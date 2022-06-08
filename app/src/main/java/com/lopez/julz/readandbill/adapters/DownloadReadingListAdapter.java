@@ -111,7 +111,7 @@ public class DownloadReadingListAdapter extends RecyclerView.Adapter<DownloadRea
 
     public void fetchDownloadbleList(ReadingSchedules readingSchedules, CircularProgressIndicator downloadProgress, FloatingActionButton downloadFab, int position) {
         try {
-            Call<List<DownloadedPreviousReadings>> downloadCall = requestPlaceHolder.downloadAccounts(readingSchedules.getAreaCode(), readingSchedules.getGroupCode(), readingSchedules.getServicePeriod());
+            Call<List<DownloadedPreviousReadings>> downloadCall = requestPlaceHolder.downloadAccounts(readingSchedules.getAreaCode(), readingSchedules.getGroupCode(), readingSchedules.getServicePeriod(), readingSchedules.getMeterReader());
 
             downloadCall.enqueue(new Callback<List<DownloadedPreviousReadings>>() {
                 @Override
