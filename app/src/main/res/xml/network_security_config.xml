@@ -11,6 +11,9 @@
         <domain includeSubdomains="true">192.168.0.111</domain>
         <domain includeSubdomains="true">192.168.0.100</domain>
         <domain includeSubdomains="true">192.168.5.97</domain>
+        <domain includeSubdomains="true">10.25.27.25</domain>
+        <domain includeSubdomains="true">192.168.5.5</domain>
+        <domain includeSubdomains="true">192.168.5.6</domain>
 
         <!-- DEPLOYMENT -->
         <domain includeSubdomains="true">192.168.100.10</domain>
@@ -25,5 +28,6 @@
         <domain includeSubdomains="true">192.168.100.4</domain>
         <domain includeSubdomains="true">192.168.100.1</domain>
         <domain includeSubdomains="true">203.177.135.179</domain>
+        <domain includeSubdomains="true">192.168.100.148</domain>
     </domain-config>
 </network-security-config>

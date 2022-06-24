@@ -41,6 +41,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.lopez.julz.readandbill.api.RequestPlaceHolder;
 import com.lopez.julz.readandbill.api.RetrofitBuilder;
 import com.lopez.julz.readandbill.dao.AppDatabase;
+import com.lopez.julz.readandbill.dao.Readings;
+import com.lopez.julz.readandbill.dao.ReadingsDao;
 import com.lopez.julz.readandbill.dao.Settings;
 import com.lopez.julz.readandbill.dao.Users;
 import com.lopez.julz.readandbill.dao.UsersDao;
@@ -53,6 +55,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Set;
 
 import retrofit2.Call;
@@ -135,6 +138,7 @@ public class LoginActivity extends AppCompatActivity{
     protected void onResume() {
         super.onResume();
         new FetchSettings().execute();
+//        new FetchReadingTest().execute();
     }
 
     private void login() {
@@ -349,6 +353,31 @@ public class LoginActivity extends AppCompatActivity{
                     }
                 });
             }
+        }
+    }
+
+    public class FetchReadingTest extends AsyncTask<Void, Void, Void> {
+
+        List<Readings> readingsList;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ReadingsDao readingsDao = db.readingsDao();
+            readingsList = readingsDao.getAll();
+
+            for(int i=0; i< readingsList.size(); i++) {
+                Readings r = readingsList.get(i);
+                r.setUploadStatus("UPLOADABLE");
+                readingsDao.updateAll(r);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+
+
         }
     }
 }

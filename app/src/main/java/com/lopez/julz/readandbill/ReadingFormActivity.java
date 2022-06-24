@@ -243,7 +243,12 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                             reading.setServicePeriod(servicePeriod);
                             reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
                             reading.setKwhUsed(presReadingInput.toString());
-                            reading.setNotes("ZERO READING");
+                            if (ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()) != null && ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()).equals("NOT IN USE")) {
+
+                            } else {
+                                reading.setNotes("ZERO READING");
+                            }
+
                             reading.setFieldStatus(ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()));
                             reading.setUploadStatus("UPLOADABLE");
                             reading.setMeterReader(userId);
@@ -258,7 +263,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                             new ReadAndBill().execute(reading);
                         } else {
-                            String prevKwh = currentDpr.getKwhUsed() != null ? currentDpr.getKwhUsed() : "0";
+                            String prevKwh = currentDpr.getKwhUsed() != null ? (currentDpr.getKwhUsed().length() > 0 ? currentDpr.getKwhUsed() : "0") : "0";
                             if (kwhConsumed > (Double.valueOf(prevKwh) * 2) && Double.valueOf(prevKwh) > 0) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
                                 builder.setTitle("WARNING")
@@ -355,7 +360,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                             fieldStatus.setVisibility(View.GONE);
                             fieldStatus.clearCheck();
                             revealPhotoButton(false);
-                        } else if (kwh == 0) {
+                        } else if (kwh == 0 && currentDpr.getAccountStatus().equals("ACTIVE")) {
                             /**
                              * SHOW OPTIONS FOR ZERO READING
                              */
@@ -581,11 +586,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         protected void onPostExecute(Void unused) {
             super.onPostExecute(unused);
             accountName.setText(currentDpr.getServiceAccountName() != null ? currentDpr.getServiceAccountName() : "n/a");
-            accountNumber.setText(currentDpr.getId());
+            accountNumber.setText(currentDpr.getOldAccountNo());
             if (currentDpr.getChangeMeterStartKwh() != null) {
                 prevReading.setText(currentDpr.getChangeMeterStartKwh());
             } else {
-                prevReading.setText(currentDpr.getKwhUsed()!=null ? currentDpr.getKwhUsed() : "0");
+                prevReading.setText(currentDpr.getKwhUsed()!=null ? (currentDpr.getKwhUsed().length() > 0 ? currentDpr.getKwhUsed() : "0") : "0");
             }
             accountType.setText(ReadingHelpers.getAccountType(currentDpr));
             sequenceCode.setText(currentDpr.getSequenceCode());
@@ -702,7 +707,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         protected void onPostExecute(Void unused) {
             super.onPostExecute(unused);
             accountName.setText(currentDpr.getServiceAccountName() != null ? currentDpr.getServiceAccountName() : "n/a");
-            accountNumber.setText(currentDpr.getId());
+            accountNumber.setText(currentDpr.getOldAccountNo());
             if (currentDpr.getChangeMeterStartKwh() != null) {
                 prevReading.setText(currentDpr.getChangeMeterStartKwh());
             } else {
@@ -876,7 +881,17 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                         } else {
                             /** PERFORM BILLING **/
                             if (kwhConsumed == 0) {
+                                if (reading.getFieldStatus() != null && reading.getFieldStatus().equals("NOT IN USE")) {
+                                    if (currentBill != null) {
+                                        currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
 
+                                        db.billsDao().updateAll(currentBill);
+                                    } else {
+                                        currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                        db.billsDao().insertAll(currentBill);
+                                    }
+                                }
                             } else {
                                 if (currentBill != null) {
                                     currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
@@ -908,7 +923,14 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                  * PRINT BILL
                  */
 //                print(currentBill, currentRate, currentDpr);
-                printViaEscPos(currentBill, currentRate, currentDpr, currentReading);
+                if (currentDpr.getAccountStatus().equals("ACTIVE")) {
+                    try {
+                        printViaEscPos(currentBill, currentRate, currentDpr, currentReading);
+                    } catch (Exception e) {
+                        Log.e("ERROR PRINTING", e.getMessage());
+                        Toast.makeText(ReadingFormActivity.this, "Error printing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
 
                 try {
                     TextLogger.appendLog(currentBill.getAccountNumber() + "\t" +
@@ -1534,7 +1556,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                             "[C]" + getResources().getString(R.string.companyTin) + "\n" +
                                             "[C]<b>STATEMENT OF ACCOUNT</b>\n" +
                                             "[C]" + (readings != null ? ObjectHelpers.formatDetailedDate(readings.getReadingTimestamp()) : ObjectHelpers.formatDetailedDate(ObjectHelpers.getCurrentTimestamp())) + "\n" +
-                                            "[C]<barcode type='128' height='10'>" + bills.getAccountNumber() + "</barcode>\n" +
+                                            "[C]<barcode type='128' height='10'>" + (dpr.getOldAccountNo() != null ? dpr.getOldAccountNo() : bills.getAccountNumber()) + "</barcode>\n" +
                                             "[L]\n" +
                                             "[L]<font size='tall'>Acct No: " + (dpr.getOldAccountNo() != null ? dpr.getOldAccountNo() : bills.getAccountNumber()) + "</font>\n" +
                                             "[L]<font size='tall'>" + dpr.getServiceAccountName() + "</font>\n" +
@@ -1542,7 +1564,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                             "[L]Bill Mo: " + ObjectHelpers.formatShortDate(bills.getServicePeriod()) + "[R]Mult: " + bills.getMultiplier() + "\n" +
                                             "[L]Meter No: " + (dpr.getMeterSerial() != null ? dpr.getMeterSerial() : '-') + "[R]Type: " + dpr.getAccountType() + "\n" +
                                             "[L]<b>--READING DATE--</b>[R]<b>--READING--</b>[R]<b>--KWH USED--</b>\n" +
-                                            "[L]" + ObjectHelpers.getPreviousMonth(dpr.getReadingTimestamp()) + "[R] " + dpr.getKwhUsed() + "[R]<font size='tall'>" + bills.getKwhUsed() + "</font>\n" +
+                                            "[L]" + ObjectHelpers.getPreviousMonth(dpr.getReadingTimestamp()) + "[R] " + dpr.getKwhUsed() + "[R]<font size='tall'>" + Integer.valueOf(bills.getKwhUsed()) + "</font>\n" +
                                             "[L]" + ObjectHelpers.formatNumericDate(bills.getBillingDate()) + "[R]" + bills.getPresentKwh() + "[R]\n" +
                                             "[L]<b>DUE DATE: " + ObjectHelpers.formatShortDateWithDate(bills.getDueDate()) + "</b>[R]Rate: " + ObjectHelpers.roundFour(Double.valueOf(bills.getEffectiveRate())) + "\n" +
                                             "[L]<b>DISCO DATE: " + ObjectHelpers.formatShortDateWithDate(ObjectHelpers.getDisconnection(bills.getDueDate())) + "</b>\n" +
@@ -1600,6 +1622,10 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                             "[C]----------------------------------------\n" +
                                             "[C]Amount Due\n" +
                                             "[C]<font size='big'><b>P " + ObjectHelpers.roundTwo(Double.valueOf(bills.getNetAmount())) + "</b></font>\n" +
+                                            (ReadingHelpers.getAccountType(dpr).equals("RESIDENTIAL") ? "" : "[C]Penalty Charges after Due Date\n") +
+                                            (ReadingHelpers.getAccountType(dpr).equals("RESIDENTIAL") ? "" : "[C]<b>P " + ReadingHelpers.getPenalty(bills) + "</b>\n") +
+                                            (ReadingHelpers.getAccountType(dpr).equals("RESIDENTIAL") ? "" : "[C]Amount Due after Due Date\n") +
+                                            (ReadingHelpers.getAccountType(dpr).equals("RESIDENTIAL") ? "" : "[C]<b>P " + ObjectHelpers.roundTwo(Double.valueOf(ReadingHelpers.getPenaltyNoComma(bills)) + Double.valueOf(bills.getNetAmount())) + "</b>\n") +
                                             "[R]\n" +
                                             "[C]NOTE: Please pay this bill within nine (9) days upon receipt hereof to avoid disconnection of your electric services.\n" +
                                             "[C]Rates are net of refund per ERC order 2012-018CF.\n" +
@@ -1608,8 +1634,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                             "[C]----------------------------------------\n" +
                                             "[L]Date: " + ObjectHelpers.getCurrentDate() + " " + ObjectHelpers.getCurrentTime() + "\n" +
                                             "[L]\n" +
-                                            "[L]<font size='tall'>Acct No: " + bills.getAccountNumber() + "</font>\n" +
+                                            "[L]<font size='tall'>Acct No: " + (dpr.getOldAccountNo() != null ? dpr.getOldAccountNo() : bills.getAccountNumber()) + "</font>\n" +
                                             "[L]<font size='tall'>" + dpr.getServiceAccountName() + "</font>\n" +
+                                            "[C]<font size='big'><b>P " + ObjectHelpers.roundTwo(Double.valueOf(bills.getNetAmount())) + "</b></font>\n" +
                                             "[L]Bill Mo: " + ObjectHelpers.formatShortDate(bills.getServicePeriod()) + "[R]Mult: " + bills.getMultiplier() + "\n" +
                                             "[L]Meter No: " + (dpr.getMeterSerial() != null ? dpr.getMeterSerial() : '-') +
                                             "[L]KwH Used: " + bills.getKwhUsed() + "\n" +

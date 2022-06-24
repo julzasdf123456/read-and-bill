@@ -147,6 +147,7 @@ public class UploadReadingsActivity extends AppCompatActivity {
     public void uploadReadings() {
         try {
             if (readingsList.size() > 0) {
+//                Log.e("UPLOADING", readingsList.get(0).getAccountNumber() + " - " + readingsList.get(0).getKwhUsed());
                 Call<Readings> readingsCall = requestPlaceHolder.uploadReadings(readingsList.get(0));
 
                 readingsCall.enqueue(new Callback<Readings>() {
@@ -176,7 +177,7 @@ public class UploadReadingsActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                             try {
-                                AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Reading Upload Failed", response.raw() + "\n" + response.errorBody().string());
+                                AlertHelpers.showMessageDialog(UploadReadingsActivity.this, "Reading Upload Failed", response.raw() + "\n" + response.errorBody().string() + "\n" + readingsList.get(0).getId());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
