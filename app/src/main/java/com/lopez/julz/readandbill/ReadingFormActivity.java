@@ -115,7 +115,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
      */
     public EditText prevReading, presReading, notes;
     public TextView kwhUsed, accountType, rate, sequenceCode, accountStatus, coreloss, multiplier, seniorCitizen, currentArrears, totalArrears, additionalKwh, meterNo;
-    public MaterialButton billBtn, nextBtn, prevBtn, takePhotoButton, printBtn;
+    public MaterialButton billBtn, nextBtn, prevBtn, takePhotoButton, printBtn, saveOnlyBtn;
     public RadioGroup fieldStatus;
 
     private final static int REQUEST_CODE_ASK_PERMISSIONS = 1002;
@@ -187,6 +187,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         printBtn = findViewById(R.id.printBtn);
         additionalKwh = findViewById(R.id.additionalKwh);
         meterNo = findViewById(R.id.meterNo);
+        saveOnlyBtn = findViewById(R.id.saveOnlyBtn);
 
         presReading.requestFocus();
 
@@ -232,7 +233,82 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                         kwhConsumed = Double.valueOf(ReadingHelpers.getKwhUsed(currentDpr, Double.valueOf(presReadingInput.toString())));
 
                         if (kwhConsumed < 0) {
-                            AlertHelpers.showMessageDialog(ReadingFormActivity.this, "Invalid Input", "Present reading must not be less than the previous reading. Kindly check your input and try again.");
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
+                            builder.setTitle("Change Meter or Reset")
+                                    .setMessage("You inputted a negative amount. Verify if this reading is correct and the meter has been changed or reset.")
+                                    .setPositiveButton("CHANGE METER", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            /**
+                                             * SAVE READING
+                                             */
+                                            Readings reading = new Readings();
+                                            reading.setId(readingId);
+                                            reading.setAccountNumber(currentDpr.getId());
+                                            reading.setServicePeriod(servicePeriod);
+                                            reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                            reading.setKwhUsed(presReadingInput.toString());
+                                            reading.setFieldStatus("CHANGE METER");
+                                            reading.setNotes(notes.getText().toString());
+                                            reading.setUploadStatus("UPLOADABLE");
+                                            reading.setMeterReader(userId);
+                                            kwhConsumed = reading.getKwhUsed() != null ? Double.valueOf(reading.getKwhUsed()) : 0;
+                                            if (locationComponent != null) {
+                                                try {
+                                                    reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
+                                                    reading.setLongitude(locationComponent.getLastKnownLocation().getLongitude() + "");
+                                                } catch (Exception e) {
+                                                    Log.e("ERR_GET_LOC", e.getMessage());
+                                                }
+                                            }
+
+                                            new ReadAndBill().execute(reading);
+                                        }
+                                    })
+                                    .setNeutralButton("CANCEL", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            dialogInterface.dismiss();
+
+                                        }
+                                    })
+                                    .setNegativeButton("RESET", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            /**
+                                             * SAVE READING
+                                             */
+                                            Readings reading = new Readings();
+                                            reading.setId(readingId);
+                                            reading.setAccountNumber(currentDpr.getId());
+                                            reading.setServicePeriod(servicePeriod);
+                                            reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                            reading.setKwhUsed(presReadingInput.toString());
+                                            reading.setFieldStatus("RESET");
+                                            reading.setNotes(notes.getText().toString());
+                                            reading.setUploadStatus("UPLOADABLE");
+                                            reading.setMeterReader(userId);
+
+                                            kwhConsumed = Math.abs(kwhConsumed);
+                                            double ogReading = reading.getKwhUsed() != null ? Double.valueOf(reading.getKwhUsed()) : 0;
+                                            double resetKwh = ReadingHelpers.getNearestRoundCeiling(ogReading);
+                                            double resetDif = resetKwh - ogReading;
+                                            kwhConsumed = ogReading + resetDif;
+
+                                            if (locationComponent != null) {
+                                                try {
+                                                    reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
+                                                    reading.setLongitude(locationComponent.getLastKnownLocation().getLongitude() + "");
+                                                } catch (Exception e) {
+                                                    Log.e("ERR_GET_LOC", e.getMessage());
+                                                }
+                                            }
+
+                                            new ReadAndBill().execute(reading);
+                                        }
+                                    });
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
                         } else if (kwhConsumed == 0) {
                             /**
                              * SAVE AND BILL
@@ -243,12 +319,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                             reading.setServicePeriod(servicePeriod);
                             reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
                             reading.setKwhUsed(presReadingInput.toString());
-                            if (ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()) != null && ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()).equals("NOT IN USE")) {
-
-                            } else {
-                                reading.setNotes("ZERO READING");
-                            }
-
+                            reading.setNotes(notes.getText().toString());
                             reading.setFieldStatus(ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()));
                             reading.setUploadStatus("UPLOADABLE");
                             reading.setMeterReader(userId);
@@ -286,7 +357,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                                 reading.setServicePeriod(servicePeriod);
                                                 reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
                                                 reading.setKwhUsed(presReadingInput.toString());
-                                                reading.setNotes("DRASTIC INCREASE OF USAGE");
+                                                reading.setNotes(notes.getText().toString());
                                                 reading.setFieldStatus("OVERREADING");
                                                 reading.setUploadStatus("UPLOADABLE");
                                                 reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
@@ -340,7 +411,196 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                     e.printStackTrace();
                     Toast.makeText(ReadingFormActivity.this, "No inputted present reading!", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
 
+        saveOnlyBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    Object presReadingInput = presReading.getText();
+                    if (presReadingInput != null) {
+                        kwhConsumed = Double.valueOf(ReadingHelpers.getKwhUsed(currentDpr, Double.valueOf(presReadingInput.toString())));
+
+                        if (kwhConsumed < 0) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
+                            builder.setTitle("Change Meter or Reset")
+                                    .setMessage("You inputted a negative amount. Verify if this reading is correct and the meter has been changed or reset.")
+                                    .setPositiveButton("CHANGE METER", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            /**
+                                             * SAVE READING
+                                             */
+                                            Readings reading = new Readings();
+                                            reading.setId(readingId);
+                                            reading.setAccountNumber(currentDpr.getId());
+                                            reading.setServicePeriod(servicePeriod);
+                                            reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                            reading.setKwhUsed(presReadingInput.toString());
+                                            reading.setFieldStatus("CHANGE METER");
+                                            reading.setNotes(notes.getText().toString());
+                                            reading.setUploadStatus("UPLOADABLE");
+                                            reading.setMeterReader(userId);
+                                            kwhConsumed = reading.getKwhUsed() != null ? Double.valueOf(reading.getKwhUsed()) : 0;
+                                            if (locationComponent != null) {
+                                                try {
+                                                    reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
+                                                    reading.setLongitude(locationComponent.getLastKnownLocation().getLongitude() + "");
+                                                } catch (Exception e) {
+                                                    Log.e("ERR_GET_LOC", e.getMessage());
+                                                }
+                                            }
+
+                                            new ReadAndBill().execute(reading);
+                                        }
+                                    })
+                                    .setNeutralButton("CANCEL", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            dialogInterface.dismiss();
+
+                                        }
+                                    })
+                                    .setNegativeButton("RESET", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            /**
+                                             * SAVE READING
+                                             */
+                                            Readings reading = new Readings();
+                                            reading.setId(readingId);
+                                            reading.setAccountNumber(currentDpr.getId());
+                                            reading.setServicePeriod(servicePeriod);
+                                            reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                            reading.setKwhUsed(presReadingInput.toString());
+                                            reading.setFieldStatus("RESET");
+                                            reading.setNotes(notes.getText().toString());
+                                            reading.setUploadStatus("UPLOADABLE");
+                                            reading.setMeterReader(userId);
+
+                                            kwhConsumed = Math.abs(kwhConsumed);
+                                            double ogReading = reading.getKwhUsed() != null ? Double.valueOf(reading.getKwhUsed()) : 0;
+                                            double resetKwh = ReadingHelpers.getNearestRoundCeiling(ogReading);
+                                            double resetDif = resetKwh - ogReading;
+                                            kwhConsumed = ogReading + resetDif;
+
+                                            if (locationComponent != null) {
+                                                try {
+                                                    reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
+                                                    reading.setLongitude(locationComponent.getLastKnownLocation().getLongitude() + "");
+                                                } catch (Exception e) {
+                                                    Log.e("ERR_GET_LOC", e.getMessage());
+                                                }
+                                            }
+
+                                            new ReadAndBill().execute(reading);
+                                        }
+                                    });
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        } else if (kwhConsumed == 0) {
+                            /**
+                             * SAVE AND BILL
+                             */
+                            Readings reading = new Readings();
+                            reading.setId(readingId);
+                            reading.setAccountNumber(currentDpr.getId());
+                            reading.setServicePeriod(servicePeriod);
+                            reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                            reading.setKwhUsed(presReadingInput.toString());
+                            reading.setNotes(notes.getText().toString());
+                            reading.setFieldStatus(ObjectHelpers.getSelectedTextFromRadioGroup(fieldStatus, getWindow().getDecorView()));
+                            reading.setUploadStatus("UPLOADABLE");
+                            reading.setMeterReader(userId);
+                            if (locationComponent != null) {
+                                try {
+                                    reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
+                                    reading.setLongitude(locationComponent.getLastKnownLocation().getLongitude() + "");
+                                } catch (Exception e) {
+                                    Log.e("ERR_GET_LOC", e.getMessage());
+                                }
+                            }
+
+                            new ReadAndBillDontPrint().execute(reading);
+                        } else {
+                            String prevKwh = currentDpr.getKwhUsed() != null ? (currentDpr.getKwhUsed().length() > 0 ? currentDpr.getKwhUsed() : "0") : "0";
+                            if (kwhConsumed > (Double.valueOf(prevKwh) * 2) && Double.valueOf(prevKwh) > 0) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
+                                builder.setTitle("WARNING")
+                                        .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo(((kwhConsumed / Double.valueOf(prevKwh)) * 100)) + "%. Do you wish to proceed?")
+                                        .setNegativeButton("REVIEW READING", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                dialogInterface.dismiss();
+                                            }
+                                        })
+                                        .setPositiveButton("PROCEED", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                /**
+                                                 * SAVE AND BILL
+                                                 */
+                                                Readings reading = new Readings();
+                                                reading.setId(readingId);
+                                                reading.setAccountNumber(currentDpr.getId());
+                                                reading.setServicePeriod(servicePeriod);
+                                                reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                                reading.setKwhUsed(presReadingInput.toString());
+                                                reading.setNotes(notes.getText().toString());
+                                                reading.setFieldStatus("OVERREADING");
+                                                reading.setUploadStatus("UPLOADABLE");
+                                                reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                                reading.setMeterReader(userId);
+                                                if (locationComponent != null) {
+                                                    try {
+                                                        reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
+                                                        reading.setLongitude(locationComponent.getLastKnownLocation().getLongitude() + "");
+                                                    } catch (Exception e) {
+                                                        Log.e("ERR_GET_LOC", e.getMessage());
+                                                    }
+                                                }
+                                                new ReadAndBillDontPrint().execute(reading);
+                                                Toast.makeText(ReadingFormActivity.this, "Billed successfully", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+
+                                builder.create().show();
+                            } else {
+                                /**
+                                 * SAVE AND BILL
+                                 */
+                                Readings reading = new Readings();
+                                reading.setId(readingId);
+                                reading.setAccountNumber(currentDpr.getId());
+                                reading.setServicePeriod(servicePeriod);
+                                reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                reading.setKwhUsed(presReadingInput.toString());
+                                reading.setNotes(notes.getText().toString());
+                                reading.setUploadStatus("UPLOADABLE");
+                                reading.setReadingTimestamp(ObjectHelpers.getCurrentTimestamp());
+                                reading.setMeterReader(userId);
+                                if (locationComponent != null) {
+                                    try {
+                                        reading.setLatitude(locationComponent.getLastKnownLocation().getLatitude() + "");
+                                        reading.setLongitude(locationComponent.getLastKnownLocation().getLongitude() + "");
+                                    } catch (Exception e) {
+                                        Log.e("ERR_GET_LOC", e.getMessage());
+                                    }
+                                }
+                                new ReadAndBillDontPrint().execute(reading);
+                                Toast.makeText(ReadingFormActivity.this, "Billed successfully", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    } else {
+                        Toast.makeText(ReadingFormActivity.this, "No inputted present reading!", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Log.e("ERR_COMP", e.getMessage());
+                    e.printStackTrace();
+                    Toast.makeText(ReadingFormActivity.this, "No inputted present reading!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -623,9 +883,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                 if (currentReading.getUploadStatus().equals("UPLOADED")) {
                     billBtn.setEnabled(false);
+                    saveOnlyBtn.setEnabled(false);
                     takePhotoButton.setEnabled(false);
                 } else {
                     billBtn.setEnabled(true);
+                    saveOnlyBtn.setEnabled(true);
                     takePhotoButton.setEnabled(true);
 
                     /**
@@ -749,9 +1011,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                 if (currentReading.getUploadStatus().equals("UPLOADED")) {
                     billBtn.setEnabled(false);
+                    saveOnlyBtn.setEnabled(false);
                     takePhotoButton.setEnabled(false);
                 } else {
                     billBtn.setEnabled(true);
+                    saveOnlyBtn.setEnabled(true);
                     takePhotoButton.setEnabled(true);
 
                     /**
@@ -876,12 +1140,142 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                         db.downloadedPreviousReadingsDao().updateAll(currentDpr);
 
                         /** READ ONLY **/
-                        if ((currentDpr.getAccountStatus() != null && currentDpr.getAccountStatus().equals("DISCONNECTED")) || currentDpr.getChangeMeterAdditionalKwh() != null) {
+                        if ((currentDpr.getAccountStatus() != null && (currentDpr.getAccountStatus().equals("DISCONNECTED")) && kwhConsumed == 0) || currentDpr.getChangeMeterAdditionalKwh() != null) {
 
                         } else {
                             /** PERFORM BILLING **/
                             if (kwhConsumed == 0) {
                                 if (reading.getFieldStatus() != null && reading.getFieldStatus().equals("NOT IN USE")) {
+                                    if (currentBill != null) {
+                                        currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                        db.billsDao().updateAll(currentBill);
+                                    } else {
+                                        currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                        db.billsDao().insertAll(currentBill);
+                                    }
+                                }
+                            } else if (kwhConsumed <= -1) {
+                                if (reading.getFieldStatus() != null && reading.getFieldStatus().equals("RESET")) {
+                                    if (currentBill != null) {
+                                        currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                        db.billsDao().updateAll(currentBill);
+                                    } else {
+                                        currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                        db.billsDao().insertAll(currentBill);
+                                    }
+                                }
+                            } else {
+                                if (currentBill != null) {
+                                    currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                    db.billsDao().updateAll(currentBill);
+                                } else {
+                                    currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                    db.billsDao().insertAll(currentBill);
+                                }
+                            }
+                        }
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                Log.e("ERR_READ_AND_BILL", e.getMessage());
+                e.printStackTrace();
+                errors = e.getMessage();
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (aBoolean) {
+                /**
+                 * PRINT BILL
+                 */
+//                print(currentBill, currentRate, currentDpr);
+                if (currentBill != null) {
+                    try {
+                        printViaEscPos(currentBill, currentRate, currentDpr, currentReading);
+                    } catch (Exception e) {
+                        Log.e("ERROR PRINTING", e.getMessage());
+                        Toast.makeText(ReadingFormActivity.this, "Error printing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                try {
+                    TextLogger.appendLog(currentReading.getAccountNumber() + "\t" +
+                                    currentReading.getReadingTimestamp() + "\t" +
+                                    currentReading.getKwhUsed() + "\t" +
+                                    currentReading.getDemandKwhUsed() + "\t" +
+                                    currentReading.getServicePeriod() + "\t",
+                            servicePeriod,
+                            ReadingFormActivity.this);
+                } catch (Exception e) {
+                    Log.e("ERROR_LOGGING_TEXT", e.getMessage());
+                }
+
+                /**
+                 * PROCEED TO NEXT
+                 */
+                new FetchAccount().execute("next", currentDpr.getSequenceCode() != null ? (currentDpr.getSequenceCode().length() < 1 ? "001" : currentDpr.getSequenceCode()) : "001");
+            } else {
+                AlertHelpers.showMessageDialog(ReadingFormActivity.this, "ERROR", "An error occurred while performing the reading. \n" + errors);
+            }
+        }
+    }
+
+    /**
+     * SAVE READING AND BILL AND SAVE
+     */
+    public class ReadAndBillDontPrint extends AsyncTask<Readings, Void, Boolean> {
+        String errors;
+
+        @Override
+        protected Boolean doInBackground(Readings... readings) {
+            try {
+                if (readings != null) {
+                    Readings reading = readings[0];
+                    if (reading != null) {
+                        /** INSERT READING **/
+                        if (currentReading != null) {
+                            currentReading.setKwhUsed(reading.getKwhUsed());
+                            currentReading.setNotes("PERFORMED RE-READING");
+                            currentReading.setLatitude(reading.getLatitude());
+                            currentReading.setLongitude(reading.getLongitude());
+                            db.readingsDao().updateAll(currentReading);
+                        } else {
+                            db.readingsDao().insertAll(reading);
+                        }
+
+                        /** UPDATE STATUS OF DOWNLOADED READING **/
+                        currentDpr.setStatus("READ");
+                        db.downloadedPreviousReadingsDao().updateAll(currentDpr);
+
+                        /** READ ONLY **/
+                        if ((currentDpr.getAccountStatus() != null && (currentDpr.getAccountStatus().equals("DISCONNECTED")) && kwhConsumed == 0) || currentDpr.getChangeMeterAdditionalKwh() != null) {
+
+                        } else {
+                            /** PERFORM BILLING **/
+                            if (kwhConsumed == 0) {
+                                if (reading.getFieldStatus() != null && reading.getFieldStatus().equals("NOT IN USE")) {
+                                    if (currentBill != null) {
+                                        currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                        db.billsDao().updateAll(currentBill);
+                                    } else {
+                                        currentBill = ReadingHelpers.generateRegularBill(null, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
+
+                                        db.billsDao().insertAll(currentBill);
+                                    }
+                                }
+                            } else if (kwhConsumed <= -1) {
+                                if (reading.getFieldStatus() != null && reading.getFieldStatus().equals("RESET")) {
                                     if (currentBill != null) {
                                         currentBill = ReadingHelpers.generateRegularBill(currentBill, currentDpr, currentRate, kwhConsumed, Double.valueOf(reading.getKwhUsed()), userId);
 
@@ -925,7 +1319,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 //                print(currentBill, currentRate, currentDpr);
                 if (currentDpr.getAccountStatus().equals("ACTIVE")) {
                     try {
-                        printViaEscPos(currentBill, currentRate, currentDpr, currentReading);
+//                        printViaEscPos(currentBill, currentRate, currentDpr, currentReading);
                     } catch (Exception e) {
                         Log.e("ERROR PRINTING", e.getMessage());
                         Toast.makeText(ReadingFormActivity.this, "Error printing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -933,15 +1327,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 }
 
                 try {
-                    TextLogger.appendLog(currentBill.getAccountNumber() + "\t" +
-                                    currentBill.getBillingDate() + "\t" +
-                                    currentBill.getKwhUsed() + "\t" +
-                                    currentBill.getDemandPresentKwh() + "\t" +
-                                    currentBill.getPreviousKwh() + "\t" +
-                                    currentBill.getPresentKwh() + "\t" +
-                                    currentBill.getServicePeriod() + "\t" +
-                                    currentBill.getServiceDateTo() + "\t" +
-                                    currentBill.getDueDate(),
+                    TextLogger.appendLog(currentReading.getAccountNumber() + "\t" +
+                                    currentReading.getReadingTimestamp() + "\t" +
+                                    currentReading.getKwhUsed() + "\t" +
+                                    currentReading.getDemandKwhUsed() + "\t" +
+                                    currentReading.getServicePeriod() + "\t",
                             servicePeriod,
                             ReadingFormActivity.this);
                 } catch (Exception e) {
@@ -1165,9 +1555,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         if (regex) {
             takePhotoButton.setVisibility(View.VISIBLE);
             billBtn.setVisibility(View.GONE);
+            saveOnlyBtn.setVisibility(View.GONE);
         } else {
             takePhotoButton.setVisibility(View.GONE);
             billBtn.setVisibility(View.VISIBLE);
+            saveOnlyBtn.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1564,7 +1956,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                             "[L]Bill Mo: " + ObjectHelpers.formatShortDate(bills.getServicePeriod()) + "[R]Mult: " + bills.getMultiplier() + "\n" +
                                             "[L]Meter No: " + (dpr.getMeterSerial() != null ? dpr.getMeterSerial() : '-') + "[R]Type: " + dpr.getAccountType() + "\n" +
                                             "[L]<b>--READING DATE--</b>[R]<b>--READING--</b>[R]<b>--KWH USED--</b>\n" +
-                                            "[L]" + ObjectHelpers.getPreviousMonth(dpr.getReadingTimestamp()) + "[R] " + dpr.getKwhUsed() + "[R]<font size='tall'>" + Integer.valueOf(bills.getKwhUsed()) + "</font>\n" +
+                                            "[L]" + (bills.getServiceDateFrom() != null ? bills.getServiceDateFrom() : ObjectHelpers.getPreviousMonth(bills.getBillingDate())) + "[R] " + dpr.getKwhUsed() + "[R]<font size='tall'>" + bills.getKwhUsed() + "</font>\n" +
                                             "[L]" + ObjectHelpers.formatNumericDate(bills.getBillingDate()) + "[R]" + bills.getPresentKwh() + "[R]\n" +
                                             "[L]<b>DUE DATE: " + ObjectHelpers.formatShortDateWithDate(bills.getDueDate()) + "</b>[R]Rate: " + ObjectHelpers.roundFour(Double.valueOf(bills.getEffectiveRate())) + "\n" +
                                             "[L]<b>DISCO DATE: " + ObjectHelpers.formatShortDateWithDate(ObjectHelpers.getDisconnection(bills.getDueDate())) + "</b>\n" +

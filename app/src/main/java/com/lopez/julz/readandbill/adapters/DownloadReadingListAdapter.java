@@ -129,11 +129,13 @@ public class DownloadReadingListAdapter extends RecyclerView.Adapter<DownloadRea
                 @Override
                 public void onFailure(Call<List<DownloadedPreviousReadings>> call, Throwable t) {
                     Log.e("ERR_FETCH_DATA", t.getMessage());
+                    t.printStackTrace();
                     Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (Exception e) {
             Log.e("ERR_FETCH_DATA", e.getMessage());
+            e.printStackTrace();
             Toast.makeText(context, "Error fetching data", Toast.LENGTH_SHORT).show();
         }
     }

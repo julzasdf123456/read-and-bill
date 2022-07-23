@@ -2,20 +2,9 @@ package com.lopez.julz.readandbill;
 
 import static com.lopez.julz.readandbill.helpers.ObjectHelpers.hasPermissions;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.room.Room;
-
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -27,14 +16,10 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.epson.epos2.Epos2CallbackCode;
-import com.epson.epos2.Epos2Exception;
-import com.epson.epos2.printer.Printer;
-import com.epson.epos2.printer.PrinterStatusInfo;
-import com.epson.epos2.printer.ReceiveListener;
-import com.epson.eposprint.Builder;
-import com.epson.eposprint.EposException;
-import com.epson.eposprint.Print;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.room.Room;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -46,17 +31,11 @@ import com.lopez.julz.readandbill.dao.ReadingsDao;
 import com.lopez.julz.readandbill.dao.Settings;
 import com.lopez.julz.readandbill.dao.Users;
 import com.lopez.julz.readandbill.dao.UsersDao;
-import com.lopez.julz.readandbill.helpers.AlertHelpers;
 import com.lopez.julz.readandbill.helpers.ObjectHelpers;
-import com.lopez.julz.readandbill.helpers.Result;
 import com.lopez.julz.readandbill.objects.Login;
 
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;

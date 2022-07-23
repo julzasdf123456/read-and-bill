@@ -147,7 +147,7 @@ public class ReadingHelpers {
                     Double.valueOf(bill.getMeteringSystemCharge());
 
             if (getAccountType(dpr).equals("RESIDENTIAL") || getAccountType(dpr).equals("RURAL RESIDENTIAL")) {
-                if (kwhUsed < 15) {
+                if (kwhUsed <= 15) {
                     return "-" + ObjectHelpers.roundFour(deductibles * .5);
                 } else if (kwhUsed >= 16 && kwhUsed < 17) {
                     return "-" + ObjectHelpers.roundTwo(deductibles * .4);
@@ -247,7 +247,9 @@ public class ReadingHelpers {
                 Double.valueOf(bill.getBusinessTax()) +
                 Double.valueOf(bill.getSeniorCitizenSubsidy()) +
                 Double.valueOf(bill.getLifelineRate()) +
-                Double.valueOf(additionalCharges);
+                Double.valueOf(additionalCharges) -
+                Double.valueOf(bill.getEvat2Percent()) -
+                Double.valueOf(bill.getEvat5Percent());
 
             return ObjectHelpers.roundFourNoComma(amount);
         } catch (Exception e) {
@@ -269,6 +271,40 @@ public class ReadingHelpers {
             return ObjectHelpers.roundFourNoComma(vatables * .12);
         } catch (Exception e) {
             Log.e("ERR_GET_DST_VAT", e.getMessage());
+            return "0";
+        }
+    }
+
+    public static String getFivePercent(Bills bills) {
+        try {
+            double vatables = Double.valueOf(bills.getDistributionSystemCharge()) +
+                    Double.valueOf(bills.getDistributionDemandCharge()) +
+                    Double.valueOf(bills.getSupplyRetailCustomerCharge()) +
+                    Double.valueOf(bills.getMeteringRetailCustomerCharge()) +
+                    Double.valueOf(bills.getLifelineRate()) +
+                    Double.valueOf(bills.getInterClassCrossSubsidyCharge()) +
+                    Double.valueOf(bills.getOtherLifelineRateCostAdjustment());
+
+            return ObjectHelpers.roundFourNoComma(vatables * .05);
+        } catch (Exception e) {
+            Log.e("ERR_GET_TWO_PERCENT", e.getMessage());
+            return "0";
+        }
+    }
+
+    public static String getTwoPercent(Bills bills) {
+        try {
+            double vatables = Double.valueOf(bills.getDistributionSystemCharge()) +
+                    Double.valueOf(bills.getDistributionDemandCharge()) +
+                    Double.valueOf(bills.getSupplyRetailCustomerCharge()) +
+                    Double.valueOf(bills.getMeteringRetailCustomerCharge()) +
+                    Double.valueOf(bills.getLifelineRate()) +
+                    Double.valueOf(bills.getInterClassCrossSubsidyCharge()) +
+                    Double.valueOf(bills.getOtherLifelineRateCostAdjustment());
+
+            return ObjectHelpers.roundFourNoComma(vatables * .02);
+        } catch (Exception e) {
+            Log.e("ERR_GET_TWO_PERCENT", e.getMessage());
             return "0";
         }
     }
@@ -352,6 +388,21 @@ public class ReadingHelpers {
                     bill.setLifelineRate(getLifelineRate(dpr, bill, rate));
 
                     bill.setDistributionVAT(getDistributionVat(bill));
+
+                    /**
+                     * EVAT
+                     */
+                    if (dpr.getEwt2Percent() != null && dpr.getEwt2Percent().equals("Yes")) {
+                        bill.setEvat2Percent(getTwoPercent(bill));
+                    } else {
+                        bill.setEvat2Percent("0");
+                    }
+
+                    if (dpr.getEvat5Percent() != null && dpr.getEvat5Percent().equals("Yes")) {
+                        bill.setEvat5Percent(getFivePercent(bill));
+                    } else {
+                        bill.setEvat5Percent("0");
+                    }
 
                     bill.setNetAmount(getNetAmount(dpr, bill));
 
@@ -451,6 +502,21 @@ public class ReadingHelpers {
 
                     bill.setDistributionVAT(getDistributionVat(bill));
 
+                    /**
+                     * EVAT
+                     */
+                    if (dpr.getEwt2Percent() != null && dpr.getEwt2Percent().equals("Yes")) {
+                        bill.setEvat2Percent(getTwoPercent(bill));
+                    } else {
+                        bill.setEvat2Percent("0");
+                    }
+
+                    if (dpr.getEvat5Percent() != null && dpr.getEvat5Percent().equals("Yes")) {
+                        bill.setEvat5Percent(getFivePercent(bill));
+                    } else {
+                        bill.setEvat5Percent("0");
+                    }
+
                     bill.setNetAmount(getNetAmount(dpr, bill));
 
                     /**
@@ -500,5 +566,10 @@ public class ReadingHelpers {
             return "RESIDENTIAL";
         }
 
+    }
+
+    public static double getNearestRoundCeiling(double x) {
+        final double pow = Math.pow(10, -Math.floor(Math.log10(x)));
+        return Math.ceil(x * pow) / pow;
     }
 }

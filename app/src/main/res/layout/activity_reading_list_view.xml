@@ -36,7 +36,6 @@
                 android:id="@+id/searchList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="7pt"
                 android:hint="Search Acct Name, Acct No, Meter No"
                 android:inputType="text"
                 android:background="@drawable/options_custom_form"

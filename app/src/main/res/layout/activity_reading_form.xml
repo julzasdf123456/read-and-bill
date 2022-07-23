@@ -224,8 +224,16 @@
                         android:id="@+id/billBtn"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Read and Bill"
+                        android:text="Read, Bill and Print"
                         android:drawableLeft="@drawable/ic_baseline_playlist_add_check_circle_24"
+                        android:layout_marginTop="15dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/saveOnlyBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Read, Bill and Save"
+                        android:drawableLeft="@drawable/ic_baseline_save_24"
                         android:layout_marginTop="15dp"/>
 
                     <com.google.android.material.button.MaterialButton

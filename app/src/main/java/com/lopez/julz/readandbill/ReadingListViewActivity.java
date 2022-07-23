@@ -12,6 +12,7 @@ import androidx.room.Room;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -102,6 +103,8 @@ public class ReadingListViewActivity extends AppCompatActivity {
         readingListTitle.setText("Area " + areaCode + " | Day " + groupCode + " (" + ObjectHelpers.formatShortDate(servicePeriod) + ")");
 
         new GetReadingList().execute();
+
+        search.setRawInputType(Configuration.KEYBOARD_12KEY);
 
         search.addTextChangedListener(new TextWatcher() {
             @Override
