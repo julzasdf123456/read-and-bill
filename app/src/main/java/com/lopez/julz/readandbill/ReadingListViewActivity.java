@@ -92,6 +92,7 @@ public class ReadingListViewActivity extends AppCompatActivity {
         areaCode = getIntent().getExtras().getString("AREACODE");
         groupCode = getIntent().getExtras().getString("GROUPCODE");
         servicePeriod = getIntent().getExtras().getString("SERVICEPERIOD");
+        Log.e("TEST", servicePeriod);
 
         search = findViewById(R.id.searchList);
         downloadedPreviousReadingsList = new ArrayList<>();
@@ -104,7 +105,7 @@ public class ReadingListViewActivity extends AppCompatActivity {
 
         new GetReadingList().execute();
 
-        search.setRawInputType(Configuration.KEYBOARD_12KEY);
+        search.setRawInputType(Configuration.KEYBOARD_QWERTY);
 
         search.addTextChangedListener(new TextWatcher() {
             @Override

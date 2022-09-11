@@ -103,7 +103,7 @@ public class LoginActivity extends AppCompatActivity{
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
 
-
+        Log.e("SQL_LIC_ERR", "SQL License Exception\nThe developer license doesn't currently support multi-streaming of data. Please purchase SQL Standard Edition or higher variants of MSSQL Server.");
 
         settingsBtn.setOnClickListener(new View.OnClickListener() {
             @Override

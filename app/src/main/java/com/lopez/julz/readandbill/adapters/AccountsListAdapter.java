@@ -2,6 +2,7 @@ package com.lopez.julz.readandbill.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,6 +83,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<AccountsListAdapte
                 intent.putExtra("SERVICEPERIOD", servicePeriod);
                 intent.putExtra("USERID", userId);
                 context.startActivity(intent);
+                Log.e("TEST ACT", servicePeriod);
             }
         });
     }

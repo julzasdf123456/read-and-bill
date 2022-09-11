@@ -160,8 +160,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
-                            android:textColor="?attr/textFillColor"
-                            android:text="0.0" />
+                            android:text="0.0"
+                            android:textColor="?attr/textFillColor" />
 
                     </RelativeLayout>
 

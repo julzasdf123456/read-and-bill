@@ -28,6 +28,17 @@ public class ReadingHelpers {
         }
     }
 
+    public static boolean isNumeric(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch(NumberFormatException e){
+            return false;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
     public static String generateBillNumber(String areaCode) {
         try {
             String time = new Date().getTime() + "";
@@ -127,7 +138,8 @@ public class ReadingHelpers {
 
     public static String getLifelineRate(DownloadedPreviousReadings dpr, Bills bill, Rates rate) {
         try {
-            double kwhUsed = Double.valueOf(bill.getKwhUsed()) * Double.valueOf(bill.getMultiplier());
+//            double kwhUsed = Double.valueOf(bill.getKwhUsed()) * Double.valueOf(bill.getMultiplier());
+            double kwhUsed = Double.valueOf(bill.getKwhUsed());
             if (dpr.getChangeMeterAdditionalKwh() != null) {
                 kwhUsed += Double.valueOf(Double.valueOf(dpr.getChangeMeterAdditionalKwh()));
             }
@@ -569,7 +581,24 @@ public class ReadingHelpers {
     }
 
     public static double getNearestRoundCeiling(double x) {
-        final double pow = Math.pow(10, -Math.floor(Math.log10(x)));
-        return Math.ceil(x * pow) / pow;
+//        final double pow = Math.pow(10, -Math.floor(Math.log10(x)));
+//        return Math.ceil(x * pow) / pow;
+        return getResetValue(x);
+    }
+
+    public static double getResetValue(double x) {
+        String no = String.valueOf(x).substring(0,1);
+        int num = (int)x;
+        int firstD = Integer.valueOf(no);
+        String val = (firstD + 1) + getNumZeros(String.valueOf(num).length());
+        return Double.valueOf(val);
+    }
+
+    public static String getNumZeros(int count) {
+        String zeros = "";
+        for (int i=0; i<count-1; i++) {
+            zeros += "0";
+        }
+        return zeros;
     }
 }

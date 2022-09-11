@@ -100,6 +100,7 @@ public class ReadingListAdapter extends RecyclerView.Adapter<ReadingListAdapter.
                     intent.putExtra("GROUPCODE", readingSchedule.getGroupCode());
                     intent.putExtra("SERVICEPERIOD", readingSchedule.getServicePeriod());
                     context.startActivity(intent);
+                    Log.e("TEST", readingSchedule.getServicePeriod());
                 }
             });
         }

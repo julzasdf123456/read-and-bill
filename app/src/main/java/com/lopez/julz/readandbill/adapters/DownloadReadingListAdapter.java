@@ -254,7 +254,7 @@ public class DownloadReadingListAdapter extends RecyclerView.Adapter<DownloadRea
                         DownloadedPreviousReadings downloadedPreviousReading = dpr.getOne(dprList.get(i).getId());
                         if (downloadedPreviousReading != null) {
                             // UPDATE
-                            dpr.updateAll(downloadedPreviousReading);
+                            dpr.updateAll(dprList.get(i));
                         } else {
                             // SAVE
                             dpr.insertAll(dprList.get(i));

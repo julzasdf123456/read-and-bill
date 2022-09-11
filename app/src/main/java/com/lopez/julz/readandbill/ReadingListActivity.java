@@ -80,6 +80,9 @@ public class ReadingListActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 readingSchedulesList.addAll(db.readingSchedulesDao().getActiveSchedules());
+                for(int i=0; i<readingSchedulesList.size(); i++) {
+                    Log.e("ETES", readingSchedulesList.get(i).getAreaCode() + " - " + readingSchedulesList.get(i).getServicePeriod());
+                }
 //                Log.e("TEST", readingSchedulesList.size() + "");
             } catch (Exception e) {
                 Log.e("ERR_GET_ACTV_SCHD", e.getMessage());

@@ -18,8 +18,8 @@ public interface RatesDao {
     @Update
     void updateAll(Rates... rates);
 
-    @Query("SELECT * FROM Rates WHERE ConsumerType = :consumerType AND AreaCode = :areaCode")
-    Rates getOne(String consumerType, String areaCode);
+    @Query("SELECT * FROM Rates WHERE ConsumerType = :consumerType AND AreaCode = :areaCode AND ServicePeriod = :servicePeriod")
+    Rates getOne(String consumerType, String areaCode, String servicePeriod);
 
     @Query("SELECT * FROM Rates WHERE id = :id")
     Rates getOneById(String id);

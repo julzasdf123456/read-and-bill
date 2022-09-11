@@ -162,6 +162,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         id = getIntent().getExtras().getString("ID");
         servicePeriod = getIntent().getExtras().getString("SERVICEPERIOD");
         userId = getIntent().getExtras().getString("USERID");
+        Log.e("TEST REC", servicePeriod);
 
         accountName = findViewById(R.id.accountName);
         accountNumber = findViewById(R.id.accountNumber);
@@ -291,8 +292,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                                             kwhConsumed = Math.abs(kwhConsumed);
                                             double ogReading = reading.getKwhUsed() != null ? Double.valueOf(reading.getKwhUsed()) : 0;
-                                            double resetKwh = ReadingHelpers.getNearestRoundCeiling(ogReading);
-                                            double resetDif = resetKwh - ogReading;
+                                            double prevReading = currentDpr.getKwhUsed() != null ? Double.valueOf(currentDpr.getKwhUsed()) : 0;
+                                            double resetKwh = ReadingHelpers.getNearestRoundCeiling(prevReading);
+                                            double resetDif = resetKwh - prevReading;
                                             kwhConsumed = ogReading + resetDif;
 
                                             if (locationComponent != null) {
@@ -481,8 +483,9 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                                             kwhConsumed = Math.abs(kwhConsumed);
                                             double ogReading = reading.getKwhUsed() != null ? Double.valueOf(reading.getKwhUsed()) : 0;
-                                            double resetKwh = ReadingHelpers.getNearestRoundCeiling(ogReading);
-                                            double resetDif = resetKwh - ogReading;
+                                            double prevReading = currentDpr.getKwhUsed() != null ? Double.valueOf(currentDpr.getKwhUsed()) : 0;
+                                            double resetKwh = ReadingHelpers.getNearestRoundCeiling(prevReading);
+                                            double resetDif = resetKwh - prevReading;
                                             kwhConsumed = ogReading + resetDif;
 
                                             if (locationComponent != null) {
@@ -615,6 +618,8 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 try {
                     if (charSequence != null) {
                         Double kwh = Double.valueOf(ReadingHelpers.getKwhUsed(currentDpr, Double.valueOf(charSequence.toString())));
+                        Double mult = currentDpr.getMultiplier() != null && ReadingHelpers.isNumeric(currentDpr.getMultiplier()) ? Double.valueOf(currentDpr.getMultiplier()) : 1;
+                        kwh = kwh * mult;
                         if (kwh < 0) {
                             kwhUsed.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_baseline_error_outline_18), null);
                             fieldStatus.setVisibility(View.GONE);
@@ -832,7 +837,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                     currentDpr.setAccountType("RESIDENTIAL");
                 }
 
-                currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
+                currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown(), servicePeriod);
                 currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                 currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 user = db.usersDao().getOneById(userId);
@@ -939,11 +944,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                 if (currentDpr == null) {
                     currentDpr = db.downloadedPreviousReadingsDao().getLast(areaCode, groupCode);
-                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown(), servicePeriod);
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 } else {
-                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown(), servicePeriod);
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 }
@@ -952,11 +957,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                 if (currentDpr == null) {
                     currentDpr = db.downloadedPreviousReadingsDao().getFirst(areaCode, groupCode);
-                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown(), servicePeriod);
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 } else {
-                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown());
+                    currentRate = db.ratesDao().getOne(ReadingHelpers.getAccountType(currentDpr), currentDpr.getTown(), servicePeriod);
                     currentReading = db.readingsDao().getOne(currentDpr.getId(), servicePeriod);
                     currentBill = db.billsDao().getOneByAccountNumberAndServicePeriod(currentDpr.getId(), servicePeriod);
                 }
