@@ -114,7 +114,7 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
      * FORM
      */
     public EditText prevReading, presReading, notes;
-    public TextView kwhUsed, accountType, rate, sequenceCode, accountStatus, coreloss, multiplier, seniorCitizen, currentArrears, totalArrears, additionalKwh, meterNo;
+    public TextView kwhUsed, accountType, rate, sequenceCode, accountStatus, coreloss, multiplier, seniorCitizen, currentArrears, totalArrears, additionalKwh, meterNo, katas, prepayment, percent2, percent5;
     public MaterialButton billBtn, nextBtn, prevBtn, takePhotoButton, printBtn, saveOnlyBtn;
     public RadioGroup fieldStatus;
 
@@ -188,7 +188,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
         printBtn = findViewById(R.id.printBtn);
         additionalKwh = findViewById(R.id.additionalKwh);
         meterNo = findViewById(R.id.meterNo);
+        katas = findViewById(R.id.katas);
+        prepayment = findViewById(R.id.prepayment);
         saveOnlyBtn = findViewById(R.id.saveOnlyBtn);
+        percent2 = findViewById(R.id.percent2);
+        percent5 = findViewById(R.id.percent5);
 
         presReading.requestFocus();
 
@@ -877,6 +881,34 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 meterNo.setText("-");
             }
 
+            // 2%
+            if (currentDpr.getEwt2Percent() != null && currentDpr.getEwt2Percent().equals("Yes")) {
+                percent2.setText("Yes");
+            } else {
+                percent2.setText("No");
+            }
+
+            // 5%
+            if (currentDpr.getEvat5Percent() != null && currentDpr.getEvat5Percent().equals("Yes")) {
+                percent5.setText("Yes");
+            } else {
+                percent5.setText("No");
+            }
+
+            // KATAS
+            if (currentDpr.getKatasNgVat() != null) {
+                katas.setText(ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getKatasNgVat())));
+            } else {
+                katas.setText("0.0");
+            }
+
+            // PREPAYMENT
+            if (currentDpr.getDeposit() != null) {
+                prepayment.setText(ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getDeposit())));
+            } else {
+                prepayment.setText("0.0");
+            }
+
             /**
              * IF ALREADY READ
              */
@@ -998,6 +1030,34 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                 meterNo.setText(currentDpr.getMeterSerial());
             } else {
                 meterNo.setText("-");
+            }
+
+            // 2%
+            if (currentDpr.getEwt2Percent() != null && currentDpr.getEwt2Percent().equals("Yes")) {
+                percent2.setText("Yes");
+            } else {
+                percent2.setText("No");
+            }
+
+            // 5%
+            if (currentDpr.getEvat5Percent() != null && currentDpr.getEvat5Percent().equals("Yes")) {
+                percent5.setText("Yes");
+            } else {
+                percent5.setText("No");
+            }
+
+            // KATAS
+            if (currentDpr.getKatasNgVat() != null) {
+                katas.setText(ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getKatasNgVat())));
+            } else {
+                katas.setText("0.0");
+            }
+
+            // PREPAYMENT
+            if (currentDpr.getDeposit() != null) {
+                prepayment.setText(ObjectHelpers.roundTwo(Double.valueOf(currentDpr.getDeposit())));
+            } else {
+                prepayment.setText("0.0");
             }
 
             prevBtn.setEnabled(true);
@@ -2014,10 +2074,15 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
                                             "[L]Franchise Tax [R]x[R]" + (rates.getFranchiseTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getFranchiseTax())) : "0.0000") + "/kWh[R]" + (bills.getFranchiseTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getFranchiseTax())) : "0.0") + "\n" +
                                             "[L]Business Tax [R]x[R]" + (rates.getBusinessTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getBusinessTax())) : "0.0000") + "/kWh[R]" + (bills.getBusinessTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getBusinessTax())) : "0.0") + "\n" +
                                             "[L]RP Tax [R]" + (rates.getRealPropertyTax() != null ? ObjectHelpers.roundFour(Double.valueOf(rates.getRealPropertyTax())) : "0.0000") + "/kWh[R]" + (bills.getRealPropertyTax() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getRealPropertyTax())) : "0.0") + "\n" +
-                                            "[L][R][R]SUB-TOTAL [R]" + ObjectHelpers.roundTwo(ObjectHelpers.getTotalFromItems(bills.getGenerationVAT(), bills.getTransmissionVAT(), bills.getDistributionVAT(), bills.getSystemLossVAT(), bills.getFranchiseTax(), bills.getBusinessTax(), bills.getRealPropertyTax())) + "\n" +
+                                            "[L]Katas Ng VAT [R]-" + (bills.getKatasNgVat() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getKatasNgVat())) : "0.0") + "\n" +
+                                            "[L][R][R]SUB-TOTAL [R]" + ObjectHelpers.roundTwo(ObjectHelpers.getTotalFromItems(bills.getGenerationVAT(), bills.getTransmissionVAT(), bills.getDistributionVAT(), bills.getSystemLossVAT(), bills.getFranchiseTax(), bills.getBusinessTax(), bills.getRealPropertyTax(), bills.getKatasNgVat())) + "\n" +
+                                            "[L]2% [R]" + (bills.getEvat2Percent() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getEvat2Percent())) : "0.0") + "\n" +
+                                            "[L]5% [R]" + (bills.getEvat5Percent() != null ? ObjectHelpers.roundTwo(Double.valueOf(bills.getEvat5Percent())) : "0.0") + "\n" +
                                             "[R]\n" +
                                             "[C]----------------------------------------\n" +
-                                            "[C]Amount Due\n" +
+                                            "[C]Gross Amount Due\n" +
+                                            "[C]<b>P " + ObjectHelpers.roundTwo(ObjectHelpers.sumDoubles(ObjectHelpers.validateDouble(bills.getNetAmount()), ObjectHelpers.validateDouble(bills.getEvat5Percent()), ObjectHelpers.validateDouble(bills.getEvat2Percent()))) + "</b>\n" +
+                                            "[C]Net Amount Due\n" +
                                             "[C]<font size='big'><b>P " + ObjectHelpers.roundTwo(Double.valueOf(bills.getNetAmount())) + "</b></font>\n" +
                                             (ReadingHelpers.getAccountType(dpr).equals("RESIDENTIAL") ? "" : "[C]Penalty Charges after Due Date\n") +
                                             (ReadingHelpers.getAccountType(dpr).equals("RESIDENTIAL") ? "" : "[C]<b>P " + ReadingHelpers.getPenalty(bills) + "</b>\n") +

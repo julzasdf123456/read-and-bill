@@ -101,10 +101,13 @@ public class DownloadedPreviousReadings {
     @ColumnInfo(name = "ChangeMeterStartKwh")
     private String ChangeMeterStartKwh;
 
+    @ColumnInfo(name = "KatasNgVat")
+    private String KatasNgVat;
+
     public DownloadedPreviousReadings() {
     }
 
-    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal, String townFull, String barangayFull, String purok, String deposit, String changeMeterAdditionalKwh, String changeMeterStartKwh) {
+    public DownloadedPreviousReadings(@NonNull String id, String serviceAccountName, String multiplier, String coreloss, String accountType, String accountStatus, String areaCode, String groupCode, String town, String barangay, String latitude, String longitude, String oldAccountNo, String kwhUsed, String servicePeriod, String sequenceCode, String status, String seniorCitizen, String evat5Percent, String ewt2Percent, String balance, String arrearsLedger, String meterSerial, String readingTimestamp, String arrearsTotal, String townFull, String barangayFull, String purok, String deposit, String changeMeterAdditionalKwh, String changeMeterStartKwh, String katasNgVat) {
         this.id = id;
         ServiceAccountName = serviceAccountName;
         Multiplier = multiplier;
@@ -136,6 +139,7 @@ public class DownloadedPreviousReadings {
         Deposit = deposit;
         ChangeMeterAdditionalKwh = changeMeterAdditionalKwh;
         ChangeMeterStartKwh = changeMeterStartKwh;
+        KatasNgVat = katasNgVat;
     }
 
     @NonNull
@@ -385,5 +389,13 @@ public class DownloadedPreviousReadings {
 
     public void setChangeMeterStartKwh(String changeMeterStartKwh) {
         ChangeMeterStartKwh = changeMeterStartKwh;
+    }
+
+    public String getKatasNgVat() {
+        return KatasNgVat;
+    }
+
+    public void setKatasNgVat(String katasNgVat) {
+        KatasNgVat = katasNgVat;
     }
 }

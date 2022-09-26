@@ -188,7 +188,7 @@ public class ReadingHelpers {
 
     public static String getSeniorCitizenDiscount(DownloadedPreviousReadings dpr, Bills bill, Rates rate) {
         try {
-            double kwhUsed = Double.valueOf(bill.getKwhUsed()) * Double.valueOf(bill.getMultiplier());
+            double kwhUsed = Double.valueOf(bill.getKwhUsed());
             if (dpr.getChangeMeterAdditionalKwh() != null) {
                 kwhUsed += Double.valueOf(Double.valueOf(dpr.getChangeMeterAdditionalKwh()));
             }
@@ -436,6 +436,33 @@ public class ReadingHelpers {
                             bill.setDeductedDeposit(ObjectHelpers.roundFourNoComma(netAmnt));
                             bill.setExcessDeposit(ObjectHelpers.roundFourNoComma(depositVal));
                         }
+                    } else {
+                        bill.setExcessDeposit("0");
+                        bill.setDeductedDeposit("0");
+                    }
+
+                    /**
+                     * FOR KATAS NG VAT
+                     */
+                    if (dpr.getKatasNgVat() != null) {
+                        double katasAmount = Double.valueOf(dpr.getKatasNgVat());
+                        double netAmnt = Double.valueOf(bill.getNetAmount());
+
+                        if (netAmnt > 0) {
+                            double difOfNetAmount = netAmnt - katasAmount;
+
+                            if (difOfNetAmount > 0) {
+                                bill.setNetAmount(ObjectHelpers.roundFourNoComma(difOfNetAmount));
+                                bill.setKatasNgVat(ObjectHelpers.roundFourNoComma(katasAmount));
+                            } else {
+                                bill.setNetAmount("0.0");
+                                bill.setKatasNgVat(ObjectHelpers.roundFourNoComma(netAmnt));
+                            }
+                        } else {
+                            bill.setKatasNgVat("0");
+                        }
+                    } else {
+                        bill.setKatasNgVat("0");
                     }
 
                     bill.setUserId(userId);
@@ -549,6 +576,33 @@ public class ReadingHelpers {
                             bill.setDeductedDeposit(ObjectHelpers.roundFourNoComma(netAmnt));
                             bill.setExcessDeposit(ObjectHelpers.roundFourNoComma(depositVal));
                         }
+                    } else {
+                        bill.setExcessDeposit("0");
+                        bill.setDeductedDeposit("0");
+                    }
+
+                    /**
+                     * FOR KATAS NG VAT
+                     */
+                    if (dpr.getKatasNgVat() != null) {
+                        double katasAmount = Double.valueOf(dpr.getKatasNgVat());
+                        double netAmnt = Double.valueOf(bill.getNetAmount());
+
+                        if (netAmnt > 0) {
+                            double difOfNetAmount = netAmnt - katasAmount;
+
+                            if (difOfNetAmount > 0) {
+                                bill.setNetAmount(ObjectHelpers.roundFourNoComma(difOfNetAmount));
+                                bill.setKatasNgVat(ObjectHelpers.roundFourNoComma(katasAmount));
+                            } else {
+                                bill.setNetAmount("0.0");
+                                bill.setKatasNgVat(ObjectHelpers.roundFourNoComma(netAmnt));
+                            }
+                        } else {
+                            bill.setKatasNgVat("0");
+                        }
+                    } else {
+                        bill.setKatasNgVat("0");
                     }
 
                     bill.setUserId(userId);

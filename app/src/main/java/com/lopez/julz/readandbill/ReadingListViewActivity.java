@@ -105,7 +105,7 @@ public class ReadingListViewActivity extends AppCompatActivity {
 
         new GetReadingList().execute();
 
-        search.setRawInputType(Configuration.KEYBOARD_QWERTY);
+//        search.setRawInputType(Configuration.KEYBOARD_QWERTY);
 
         search.addTextChangedListener(new TextWatcher() {
             @Override

@@ -212,10 +212,13 @@ public class Bills {
     @ColumnInfo(name = "Evat5Percent")
     private String Evat5Percent;
 
+    @ColumnInfo(name = "KatasNgVat")
+    private String KatasNgVat;
+
     public Bills() {
     }
 
-    public Bills(@NonNull String id, String billNumber, String accountNumber, String servicePeriod, String multiplier, String coreloss, String kwhUsed, String previousKwh, String presentKwh, String demandPreviousKwh, String demandPresentKwh, String additionalKwh, String additionalDemandKwh, String kwhAmount, String effectiveRate, String additionalCharges, String deductions, String netAmount, String billingDate, String serviceDateFrom, String serviceDateTo, String dueDate, String meterNumber, String consumerType, String billType, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String realPropertyTax, String otherGenerationRateAdjustment, String otherTransmissionCostAdjustmentKW, String otherTransmissionCostAdjustmentKWH, String otherSystemLossCostAdjustment, String otherLifelineRateCostAdjustment, String seniorCitizenDiscountAndSubsidyAdjustment, String franchiseTax, String businessTax, String notes, String userId, String billedFrom, String uploadStatus, String deductedDeposit, String excessDeposit, String evat2Percent, String evat5Percent) {
+    public Bills(@NonNull String id, String billNumber, String accountNumber, String servicePeriod, String multiplier, String coreloss, String kwhUsed, String previousKwh, String presentKwh, String demandPreviousKwh, String demandPresentKwh, String additionalKwh, String additionalDemandKwh, String kwhAmount, String effectiveRate, String additionalCharges, String deductions, String netAmount, String billingDate, String serviceDateFrom, String serviceDateTo, String dueDate, String meterNumber, String consumerType, String billType, String generationSystemCharge, String transmissionDeliveryChargeKW, String transmissionDeliveryChargeKWH, String systemLossCharge, String distributionDemandCharge, String distributionSystemCharge, String supplyRetailCustomerCharge, String supplySystemCharge, String meteringRetailCustomerCharge, String meteringSystemCharge, String RFSC, String lifelineRate, String interClassCrossSubsidyCharge, String PPARefund, String seniorCitizenSubsidy, String missionaryElectrificationCharge, String environmentalCharge, String strandedContractCosts, String NPCStrandedDebt, String feedInTariffAllowance, String missionaryElectrificationREDCI, String generationVAT, String transmissionVAT, String systemLossVAT, String distributionVAT, String realPropertyTax, String otherGenerationRateAdjustment, String otherTransmissionCostAdjustmentKW, String otherTransmissionCostAdjustmentKWH, String otherSystemLossCostAdjustment, String otherLifelineRateCostAdjustment, String seniorCitizenDiscountAndSubsidyAdjustment, String franchiseTax, String businessTax, String notes, String userId, String billedFrom, String uploadStatus, String deductedDeposit, String excessDeposit, String evat2Percent, String evat5Percent, String katasNgVat) {
         this.id = id;
         BillNumber = billNumber;
         AccountNumber = accountNumber;
@@ -283,6 +286,7 @@ public class Bills {
         ExcessDeposit = excessDeposit;
         Evat2Percent = evat2Percent;
         Evat5Percent = evat5Percent;
+        KatasNgVat = katasNgVat;
     }
 
     public void setId(@NonNull String id) {
@@ -820,5 +824,13 @@ public class Bills {
 
     public void setEvat5Percent(String evat5Percent) {
         Evat5Percent = evat5Percent;
+    }
+
+    public String getKatasNgVat() {
+        return KatasNgVat;
+    }
+
+    public void setKatasNgVat(String katasNgVat) {
+        KatasNgVat = katasNgVat;
     }
 }

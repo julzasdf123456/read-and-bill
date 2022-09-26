@@ -25,13 +25,13 @@ public interface DownloadedPreviousReadingsDao {
     @Query("DELETE FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod")
     void deleteAllByServicePeriod(String servicePeriod);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode ORDER BY CAST(SequenceCode AS INT)")
     List<DownloadedPreviousReadings> getAllFromSchedule(String servicePeriod, String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) > :sequenceCode AND Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode LIMIT 1")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) > :sequenceCode AND Town = :areaCode AND GroupCode = :groupCode ORDER BY CAST(SequenceCode AS INT) LIMIT 1")
     DownloadedPreviousReadings getNext(int sequenceCode, String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) < :sequenceCode AND Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE CAST(SequenceCode AS INT) < :sequenceCode AND Town = :areaCode AND GroupCode = :groupCode ORDER BY CAST(SequenceCode AS INT) DESC LIMIT 1")
     DownloadedPreviousReadings getPrevious(int sequenceCode, String areaCode, String groupCode);
 
     @Query("SELECT * FROM DownloadedPreviousReadings WHERE Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode LIMIT 1")
@@ -40,10 +40,10 @@ public interface DownloadedPreviousReadingsDao {
     @Query("SELECT * FROM DownloadedPreviousReadings WHERE Town = :areaCode AND GroupCode = :groupCode ORDER BY SequenceCode DESC LIMIT 1")
     DownloadedPreviousReadings getLast(String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status IS NULL ORDER BY SequenceCode")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status IS NULL ORDER BY CAST(SequenceCode AS INT)")
     List<DownloadedPreviousReadings> getAllUnread(String servicePeriod, String areaCode, String groupCode);
 
-    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status='READ' ORDER BY SequenceCode")
+    @Query("SELECT * FROM DownloadedPreviousReadings WHERE ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode AND Status='READ' ORDER BY CAST(SequenceCode AS INT)")
     List<DownloadedPreviousReadings> getAllRead(String servicePeriod, String areaCode, String groupCode);
 
     @Query("SELECT * FROM DownloadedPreviousReadings WHERE (ServiceAccountName LIKE :regex OR MeterSerial LIKE :regex OR OldAccountNo LIKE :regex) AND ServicePeriod = :servicePeriod AND Town = :areaCode AND GroupCode = :groupCode ORDER BY ServiceAccountName")

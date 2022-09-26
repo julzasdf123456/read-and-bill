@@ -299,4 +299,37 @@ public class ObjectHelpers {
             return 0.0;
         }
     }
+
+    public static double validateDouble(String value) {
+        try {
+            if (value != null) {
+                return Double.valueOf(value);
+            } else {
+                return 0;
+            }
+        } catch (Exception e) {
+            Log.e("ERR_VAL_DBL", e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public static double sumDoubles(Double... values) {
+        try {
+            if (values != null) {
+                int size = values.length;
+                double sum = 0;
+                for (int i=0; i<size; i++) {
+                    sum += values[i];
+                }
+                return sum;
+            } else {
+                return 0;
+            }
+        } catch (Exception e) {
+            Log.e("ER_SUM_DBL", e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }
