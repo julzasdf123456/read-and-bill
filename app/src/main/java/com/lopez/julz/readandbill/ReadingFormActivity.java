@@ -340,11 +340,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                             new ReadAndBill().execute(reading);
                         } else {
-                            String prevKwh = currentDpr.getKwhUsed() != null ? (currentDpr.getKwhUsed().length() > 0 ? currentDpr.getKwhUsed() : "0") : "0";
-                            if (kwhConsumed > (Double.valueOf(prevKwh) * 2) && Double.valueOf(prevKwh) > 0) {
+                            String prevKwh = currentDpr.getPrevKwhUsed() != null ? (currentDpr.getPrevKwhUsed().length() > 0 ? currentDpr.getPrevKwhUsed() : "0") : "0";
+                            if (kwhConsumed > (Double.valueOf(prevKwh) * 1.49) && Double.valueOf(prevKwh) > 0) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
                                 builder.setTitle("WARNING")
-                                        .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo(((kwhConsumed / Double.valueOf(prevKwh)) * 100)) + "%. Do you wish to proceed?")
+                                        .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo((((kwhConsumed-Double.valueOf(prevKwh)) / Double.valueOf(prevKwh)) * 100)) + "% (previous kWh consumption is " + prevKwh + "). Do you wish to proceed?")
                                         .setNegativeButton("REVIEW READING", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -531,11 +531,11 @@ public class ReadingFormActivity extends AppCompatActivity implements OnMapReady
 
                             new ReadAndBillDontPrint().execute(reading);
                         } else {
-                            String prevKwh = currentDpr.getKwhUsed() != null ? (currentDpr.getKwhUsed().length() > 0 ? currentDpr.getKwhUsed() : "0") : "0";
-                            if (kwhConsumed > (Double.valueOf(prevKwh) * 2) && Double.valueOf(prevKwh) > 0) {
+                            String prevKwh = currentDpr.getPrevKwhUsed() != null ? (currentDpr.getPrevKwhUsed().length() > 0 ? currentDpr.getPrevKwhUsed() : "0") : "0";
+                            if (kwhConsumed > (Double.valueOf(prevKwh) * 1.49) && Double.valueOf(prevKwh) > 0) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(ReadingFormActivity.this);
                                 builder.setTitle("WARNING")
-                                        .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo(((kwhConsumed / Double.valueOf(prevKwh)) * 100)) + "%. Do you wish to proceed?")
+                                        .setMessage("This consumer's power usage has increased by " + ObjectHelpers.roundTwo((((kwhConsumed-Double.valueOf(prevKwh)) / Double.valueOf(prevKwh)) * 100)) + "% (previous kWh consumption is " + prevKwh + "). Do you wish to proceed?")
                                         .setNegativeButton("REVIEW READING", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {

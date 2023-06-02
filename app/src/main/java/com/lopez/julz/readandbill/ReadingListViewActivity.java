@@ -182,7 +182,7 @@ public class ReadingListViewActivity extends AppCompatActivity {
                     String searchRegex = "%" + strings[0] + "%";
                     downloadedPreviousReadingsList.addAll(db.downloadedPreviousReadingsDao().getSearch(servicePeriod, areaCode, groupCode, searchRegex));
                 } else {
-                    downloadedPreviousReadingsList.addAll(db.downloadedPreviousReadingsDao().getAllFromSchedule(servicePeriod, areaCode, groupCode));
+                    downloadedPreviousReadingsList.addAll(db.downloadedPreviousReadingsDao().getAllUnread(servicePeriod, areaCode, groupCode));
                 }
 
             } catch (Exception e) {
@@ -209,7 +209,7 @@ public class ReadingListViewActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                downloadedPreviousReadingsList.addAll(db.downloadedPreviousReadingsDao().getAllFromSchedule(servicePeriod, areaCode, groupCode));
+                downloadedPreviousReadingsList.addAll(db.downloadedPreviousReadingsDao().getAllUnread(servicePeriod, areaCode, groupCode));
             } catch (Exception e) {
                 Log.e("ERR_GET_LIST", e.getMessage());
             }

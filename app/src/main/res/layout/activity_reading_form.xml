@@ -200,17 +200,6 @@
 
                     </RadioGroup>
 
-                    <EditText
-                        android:id="@+id/notes"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/options_custom_form"
-                        android:padding="8dp"
-                        android:inputType="textMultiLine"
-                        android:lines="2"
-                        android:layout_marginTop="10dp"
-                        android:hint="Remarks/Notes/Comments"/>
-
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/takePhotoButton"
                         android:layout_width="match_parent"
@@ -244,6 +233,17 @@
                         android:drawableLeft="@drawable/ic_baseline_print_24"
                         android:drawableTint="@color/white"
                         android:layout_marginTop="15dp"/>
+
+                    <EditText
+                        android:id="@+id/notes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/options_custom_form"
+                        android:padding="8dp"
+                        android:inputType="textMultiLine"
+                        android:lines="2"
+                        android:layout_marginTop="10dp"
+                        android:hint="Remarks/Notes/Comments"/>
 
                     <RelativeLayout
                         android:layout_marginTop="20dp"
