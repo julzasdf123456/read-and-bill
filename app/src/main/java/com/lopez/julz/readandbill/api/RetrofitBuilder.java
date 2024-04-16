@@ -11,8 +11,8 @@ public class RetrofitBuilder {
 
     public RetrofitBuilder(String ip) {
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(100, TimeUnit.SECONDS)
-                .readTimeout(100,TimeUnit.SECONDS).build();
+                .connectTimeout(480, TimeUnit.SECONDS)
+                .readTimeout(480,TimeUnit.SECONDS).build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(BaseURL.baseUrl(ip)).client(client)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -21,8 +21,8 @@ public class RetrofitBuilder {
 
     public RetrofitBuilder() {
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(100, TimeUnit.SECONDS)
-                .readTimeout(100,TimeUnit.SECONDS).build();
+                .connectTimeout(480, TimeUnit.SECONDS)
+                .readTimeout(480,TimeUnit.SECONDS).build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(BaseURL.baseUrl()).client(client)
                 .addConverterFactory(GsonConverterFactory.create())
