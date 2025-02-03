@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.lopez.julz.readandbill"
         minSdk 21
-        targetSdk 31
+        targetSdk 33
         versionCode 3
         versionName "3.0"
 
@@ -48,7 +48,7 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.8.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.4.1'
     implementation 'com.google.android:flexbox:2.0.1'
-    implementation 'com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.2.0'
+    implementation 'com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.3.0'
     implementation files('libs/ePOS2.jar')
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
